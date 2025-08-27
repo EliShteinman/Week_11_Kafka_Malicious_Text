@@ -31,9 +31,9 @@ class SentimentAnalyzer:
             logger.debug("Empty or invalid text for sentiment analysis")
             return "neutral"
         score = self.get_sentiment_score(text)
-        return self._convert_to_sentiment_label(score, positive, negative)
+        return self.convert_to_sentiment_label(score, positive, negative)
 
-    def _convert_to_sentiment_label(self, score: float, positive: float, negative: float) -> str:
+    def convert_to_sentiment_label(self, score: float, positive: float, negative: float) -> str:
         if score >= positive:
             return "positive"
         elif score <= negative:
@@ -67,4 +67,4 @@ if __name__ == "__main__":
     sa = SentimentAnalyzer()
     for t in tests:
         score = sa.get_sentiment_score(t)
-        print(f"{t!r:100} -> {sa._convert_to_sentiment_label(score, 0.5, -0.5)} ({score:.3f})")
+        print(f"{t!r:100} -> {sa.convert_to_sentiment_label(score, 0.5, -0.5)} ({score:.3f})")
