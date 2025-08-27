@@ -85,6 +85,7 @@ class AsyncKafkaConsumer:
         *,
         group_id: str,
         auto_offset_reset: str = "earliest",
+        enable_auto_commit: bool = True,
     ):
         """
         Args:
@@ -92,13 +93,14 @@ class AsyncKafkaConsumer:
             bootstrap_servers: Kafka bootstrap servers.
             group_id: Consumer group id.
             auto_offset_reset: Where to start if no offset is committed ("earliest" or "latest"). Defaults to "earliest".
+            enable_auto_commit: Whether to auto-commit offsets. Defaults to True. Set to False to manually control offset commits.
         """
         self._consumer = AIOKafkaConsumer(
             *topics,
             bootstrap_servers=bootstrap_servers,
             group_id=group_id,
             auto_offset_reset=auto_offset_reset,
-            enable_auto_commit=True,
+            enable_auto_commit=enable_auto_commit,
             value_deserializer=_kafka_json_deserializer,
         )
         self._started = False
