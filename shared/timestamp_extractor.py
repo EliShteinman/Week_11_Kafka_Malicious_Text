@@ -22,13 +22,13 @@ class Time_extractor:
         x = x.replace(',', ' ')
         x = x.replace('"', '')
         x = x.replace("'", '')
-        return (x)
+        return x
 
     ## Function to extract date and time
     def DateTimeExtractor(self, x):
         x = self.preprocess(x)
         DT = re.findall(self.reg, x)
-        return (DT)
+        return DT
 
 if __name__ == '__main__':
     time_extractor = Time_extractor()
