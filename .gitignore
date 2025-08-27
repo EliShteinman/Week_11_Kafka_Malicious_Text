@@ -163,3 +163,4 @@ cython_debug/
 .idea/
 מבנה תיקיות.md
 shared/nltk_data
+test.ipynb
