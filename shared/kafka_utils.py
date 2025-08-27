@@ -1,9 +1,16 @@
-"""
-Minimal aiokafka wrapper
-"""
 import json
-from typing import Callable, Awaitable, Sequence, Optional, Any
+from typing import Callable, Awaitable, Sequence, Any
 from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
+
+
+def _default_json_serializer(obj) -> bytes:
+    """Default JSON serializer with datetime support"""
+    return json.dumps(obj, ensure_ascii=False, default=str).encode("utf-8")
+
+
+def _kafka_json_deserializer(data: bytes):
+    """Default JSON deserializer"""
+    return json.loads(data.decode("utf-8")) if data else None
 
 
 class AsyncKafkaProducer:
@@ -15,7 +22,7 @@ class AsyncKafkaProducer:
         await p.stop()
     """
     def __init__(self, bootstrap_servers: str, value_serializer=None):
-        self._value_serializer = value_serializer or (lambda x: json.dumps(x, ensure_ascii=False, default=str).encode("utf-8"))
+        self._value_serializer = value_serializer or _default_json_serializer
         self._producer = AIOKafkaProducer(
             bootstrap_servers=bootstrap_servers,
             acks=1,
@@ -32,7 +39,7 @@ class AsyncKafkaProducer:
             await self._producer.stop()
             self._started = False
 
-    async def send_json(self, topic: str, obj) -> None:
+    async def send_json(self, topic: str, obj: Any) -> None:
         value = self._value_serializer(obj)
         await self._producer.send_and_wait(topic, value=value)
 
@@ -52,7 +59,7 @@ class AsyncKafkaConsumer:
             group_id=group_id,
             auto_offset_reset="latest",
             enable_auto_commit=True,
-            value_deserializer=lambda b: json.loads(b.decode("utf-8")) if b else None,
+            value_deserializer=_kafka_json_deserializer,
         )
         self._started = False
 
@@ -66,10 +73,11 @@ class AsyncKafkaConsumer:
             await self._consumer.stop()
             self._started = False
 
-    async def consume_forever(self, handler: Callable[[object], Awaitable[None]]) -> None:
+    async def consume_forever(self, handler: Callable[[str, Any], Awaitable[None]]) -> None:
         """
-        Consume messages one by one. Calls handler(msg) for each message.
+        Consume messages one by one. Calls handler(topic, msg_value) for each message,
+        where topic is the topic name and msg_value is the deserialized JSON data.
         Messages are auto-committed and won't be re-consumed.
         """
         async for msg in self._consumer:
-            await handler(msg)
+            await handler(msg.topic, msg.value)
