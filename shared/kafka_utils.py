@@ -1,9 +1,10 @@
+import asyncio
 import datetime
 import json
-from typing import Any, Awaitable, Callable, Sequence
-import asyncio
-from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 import logging
+from typing import Any, Awaitable, Callable, Optional, Sequence
+
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
 logger = logging.getLogger(__name__)
 
@@ -58,9 +59,14 @@ class AsyncKafkaProducer:
             await self._producer.stop()
             self._started = False
 
-    async def send_json(self, topic: str, obj: Any) -> None:
+    async def send_json(self, topic: str, obj: Any):
+        """
+        Send a JSON-serializable object to the given topic.
+        Returns:
+            RecordMetadata: Metadata about the sent record (topic, partition, offset, etc.).
+        """
         value = self._value_serializer(obj)
-        await self._producer.send_and_wait(topic, value=value)
+        return await self._producer.send_and_wait(topic, value=value)
 
 
 class AsyncKafkaConsumer:
@@ -110,7 +116,7 @@ class AsyncKafkaConsumer:
     async def consume_forever(
         self,
         handler: Callable[[str, Any], Awaitable[None]],
-        cancel_event: asyncio.Event = None,
+        cancel_event: Optional[asyncio.Event] = None,
     ) -> None:
         """
         Consume messages one by one. Calls handler(topic, msg_value) for each message,
@@ -126,4 +132,6 @@ class AsyncKafkaConsumer:
             try:
                 await handler(msg.topic, msg.value)
             except Exception as e:
-                pass
+                logger.exception(
+                    f"Error processing message from topic {msg.topic}: {e}"
+                )
