@@ -3,6 +3,9 @@ import json
 from typing import Any, Awaitable, Callable, Sequence
 import asyncio
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _json_default_handler(obj):
@@ -78,11 +81,6 @@ class AsyncKafkaConsumer:
         auto_offset_reset: str = "earliest",
     ):
         """
-        Usage:
-            c = AsyncKafkaConsumer(["topic1"], "localhost:9092", group_id="group")
-            await c.start()
-            await c.consume_forever(handler)
-            await c.stop()
         Args:
             topics: List of topic names to subscribe to.
             bootstrap_servers: Kafka bootstrap servers.
