@@ -3,15 +3,12 @@ class WeaponDetector:
     def __init__(self, weapons: list):
         self.weapons = weapons
 
-    def find_weapons(self, text: str):
+    def find_weapons(self, text: str) -> list[str] | None:
         list_weapons = []
         for word in text.split():
             if word in self.weapons:
                 list_weapons.append(word)
-        if len(list_weapons) > 0:
-            return list_weapons
-        else:
-            return None
+        return list_weapons if len(list_weapons) > 0 else None
 
 
 
