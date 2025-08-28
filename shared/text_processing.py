@@ -1,5 +1,8 @@
+import os
+
 import cleantext
-import nltk, os
+import nltk
+
 NLTK_DIR = os.path.join(os.getcwd(), "nltk_data")
 nltk.data.path.append(NLTK_DIR)
 nltk.download("stopwords", download_dir=NLTK_DIR, quiet=True)
@@ -15,15 +18,16 @@ class TextProcessing:
     def clean_central(text):
         if not text or text.isspace():
             return ""
-        return cleantext.clean(text,
-                               lowercase=True,
-                               extra_spaces=True,
-                               punct=True,
-                               stopwords=True,
-                               stemming=True,
-                               reg=r"[^\w\s]",
-                               reg_replace=" ",
-                               )
+        return cleantext.clean(
+            text,
+            lowercase=True,
+            extra_spaces=True,
+            punct=True,
+            stopwords=True,
+            stemming=True,
+            reg=r"[^\w\s]",
+            reg_replace=" ",
+        )
 
 
 if __name__ == "__main__":
@@ -40,7 +44,6 @@ if __name__ == "__main__":
         print(f"Original: {text}")
         print(f"Cleaned : {cleaned}")
         print("-" * 50)
-
 
     texts = [
         "Running, runner, runs – all should be stemmed.",

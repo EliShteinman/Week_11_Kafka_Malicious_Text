@@ -2,10 +2,13 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, status
+
 from shared.mongo_utils import SingletonMongoClient
-from data_repository import TweetRepository
-from models import TweetResponse, TweetModel
-import config
+
+from . import config
+from .data_repository import TweetRepository
+from .models import TweetModel, TweetResponse
+
 
 # Setup logging
 logging.basicConfig(level=config.LOG_LEVEL)
@@ -20,8 +23,8 @@ async def lifespan(app: FastAPI):
     logger.info("Application startup: connecting to database...")
     try:
         mongo_client = SingletonMongoClient(
-            uri=config.MONGO_URI,
-            db_name=config.MONGO_DB_NAME
+            uri=config.MONGO_URI, db_name=config.MONGO_DB_NAME
+
         )
         await mongo_client.connect_and_verify()
         logger.info("Database connection established successfully")
@@ -44,7 +47,7 @@ app = FastAPI(
     lifespan=lifespan,
     title="Tweet Data Retrieval API",
     version="1.0",
-    description="API for retrieving processed tweet data from MongoDB"
+    description="API for retrieving processed tweet data from MongoDB",
 )
 
 
@@ -59,7 +62,7 @@ def get_repository() -> TweetRepository:
         logger.error(f"Failed to get repository: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database connection not available"
+            detail="Database connection not available",
         )
 
 
@@ -68,10 +71,8 @@ def health_check():
     """
     Simple health check endpoint
     """
-    return {
-        "status": "ok",
-        "service": "tweet-retrieval-api"
-    }
+    return {"status": "ok", "service": "tweet-retrieval-api"}
+
 
 
 @app.get("/health")
@@ -86,20 +87,20 @@ def detailed_health_check():
         if database_status == "disconnected":
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Database not available"
+                detail="Database not available",
             )
 
         return {
             "status": "ok",
             "service": "tweet-retrieval-api",
             "version": "1.0",
-            "database_status": database_status
+            "database_status": database_status,
         }
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service unavailable"
+            detail="Service unavailable",
         )
 
 
@@ -123,7 +124,7 @@ async def get_antisemitic_tweets():
         logger.error(f"Error retrieving antisemitic tweets: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error retrieving tweets"
+            detail="Error retrieving tweets",
         )
 
 
@@ -147,7 +148,7 @@ async def get_normal_tweets():
         logger.error(f"Error retrieving normal tweets: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error retrieving tweets"
+            detail="Error retrieving tweets",
         )
 
 
@@ -158,5 +159,6 @@ if __name__ == "__main__":
         app,
         host=config.API_HOST,
         port=config.API_PORT,
-        log_level=config.LOG_LEVEL.lower()
+        log_level=config.LOG_LEVEL.lower(),
     )
+
