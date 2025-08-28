@@ -6,7 +6,8 @@ import config
 import logging
 
 logging.basicConfig(level=config.LOG_LEVEL)
-
+logging.getLogger("pymongo").setLevel(level=config.LOG_MONGO)
+logging.getLogger("kafka").setLevel(level=config.LOG_KAFKA)
 logger = logging.getLogger(__name__)
 
 
@@ -15,8 +16,8 @@ async def main():
 
     db_client = SingletonMongoClient(
         uri=config.MONGO_URI,
-        db_name=config.MONGO_DB_NAME,
-        collection_name=config.MONGO_COLLECTION_NAME,
+        db_name=config.MONGO_COLLECTION_RAW_TWEETS,
+        collection_name=config.MONGO_COLLECTION_RAW_TWEETS,
     )
     try:
         await db_client.connect_and_verify()
@@ -56,14 +57,14 @@ async def main():
 
                 for tweet in tweets:
                     try:
-                        if tweet.get(config.MONGO_TARGET_COLUM):
-                            await producer.send_json(config.KAFKA_TOPIC_1, tweet)
+                        if tweet.get(config.MONGO_CLASSIFICATION_FIELD):
+                            await producer.send_json(config.KAFKA_TOPIC_OUT_ANTISEMITIC, tweet)
                             antisemitic_count += 1
-                            logger.debug(f"Sent antisemitic tweet to {config.KAFKA_TOPIC_1}")
+                            logger.debug(f"Sent antisemitic tweet to {config.KAFKA_TOPIC_OUT_ANTISEMITIC}")
                         else:
-                            await producer.send_json(config.KAFKA_TOPIC_2, tweet)
+                            await producer.send_json(config.KAFKA_TOPIC_OUT_NOT_ANTISEMITIC, tweet)
                             not_antisemitic_count += 1
-                            logger.debug(f"Sent non-antisemitic tweet to {config.KAFKA_TOPIC_2}")
+                            logger.debug(f"Sent non-antisemitic tweet to {config.KAFKA_TOPIC_OUT_NOT_ANTISEMITIC}")
                     except Exception as e:
                         logger.error(f"Failed to send tweet to Kafka: {e}")
                         logger.debug(f"Tweet data: {tweet.get('_id', 'unknown_id')}")
