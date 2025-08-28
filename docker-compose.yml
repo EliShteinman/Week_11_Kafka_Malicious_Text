@@ -1,4 +1,4 @@
-name: myproject
+name: Kafka-Malicious-Text
 services:
   kafka:
     image: confluentinc/cp-kafka:latest
