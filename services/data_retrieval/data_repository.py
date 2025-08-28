@@ -6,6 +6,7 @@ from bson import ObjectId
 
 from shared.mongo_utils import SingletonMongoClient
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,6 +29,7 @@ class TweetRepository:
             collection = self.mongo_client.get_collection(
                 collection_name=collection_name
             )
+
             tweets = []
 
             async for tweet in collection.find():

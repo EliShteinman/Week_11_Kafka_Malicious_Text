@@ -7,6 +7,7 @@ from enricher_service import EnricherService
 
 from shared.kafka_utils import AsyncKafkaConsumer, AsyncKafkaProducer
 
+
 logging.basicConfig(level=config.LOG_LEVEL)
 
 logger = logging.getLogger(__name__)
@@ -64,6 +65,7 @@ async def main():
                     f"Processing message #{message_count} from topic '{topic}' - Tweet ID: {tweet_id}"
                 )
 
+
                 # Track processing time for each message
                 process_start_time = time.time()
                 result = await enricher.process_and_send_tweet(topic, tweet)
@@ -78,6 +80,7 @@ async def main():
                     logger.info(
                         f"Processing rate: {rate:.2f} messages/second | Total processed: {message_count}"
                     )
+
                     last_stats_time = current_time
                     processed_in_batch = 0
 

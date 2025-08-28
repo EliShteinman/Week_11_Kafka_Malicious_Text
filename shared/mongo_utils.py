@@ -62,6 +62,7 @@ class SingletonMongoClient(AsyncMongoClient):
         logger.debug(
             f"MongoDB connection status check: {'Connected' if connected else 'Not connected'}"
         )
+
         return connected
 
     def get_collection(self, db_name=None, collection_name=None):
@@ -73,6 +74,7 @@ class SingletonMongoClient(AsyncMongoClient):
         final_collection_name = (
             collection_name or self._connection_info["collection_name"]
         )
+
         if not final_db_name:
             logger.error("DB name must be provided either in init or method call")
             raise ValueError("DB name must be provided either in init or method call")
@@ -116,6 +118,7 @@ class SingletonMongoClient(AsyncMongoClient):
             logger.info(
                 f"MongoDB health check successful - Version: {health_status['mongodb_version']}"
             )
+
             return health_status
 
         except PyMongoError as e:
@@ -124,3 +127,4 @@ class SingletonMongoClient(AsyncMongoClient):
         except Exception as e:
             logger.error(f"Unexpected error during MongoDB health check: {e}")
             return {"status": "unhealthy", "error": f"Unexpected error: {str(e)}"}
+

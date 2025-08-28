@@ -7,6 +7,7 @@ from retriever_service import RetrieverData
 from shared.kafka_utils import AsyncKafkaProducer
 from shared.mongo_utils import SingletonMongoClient
 
+
 logging.basicConfig(level=config.LOG_LEVEL)
 logging.getLogger("pymongo").setLevel(level=config.LOG_MONGO)
 logging.getLogger("kafka").setLevel(level=config.LOG_KAFKA)
@@ -38,6 +39,7 @@ async def main():
     producer = AsyncKafkaProducer(
         bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}"
     )
+
     try:
         await producer.start()
         logger.info("Kafka producer started successfully")
@@ -79,6 +81,7 @@ async def main():
                             logger.debug(
                                 f"Sent non-antisemitic tweet to {config.KAFKA_TOPIC_OUT_NOT_ANTISEMITIC}"
                             )
+
                     except Exception as e:
                         logger.error(f"Failed to send tweet to Kafka: {e}")
                         logger.debug(f"Tweet data: {tweet.get('_id', 'unknown_id')}")
@@ -86,6 +89,7 @@ async def main():
                 logger.info(
                     f"Processing complete - Antisemitic: {antisemitic_count}, Not antisemitic: {not_antisemitic_count}"
                 )
+
             else:
                 logger.debug("No new tweets found in this poll")
 
@@ -105,3 +109,4 @@ if __name__ == "__main__":
     except Exception as e:
         logger.critical(f"Critical error in main: {e}")
         raise
+

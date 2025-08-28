@@ -13,11 +13,13 @@ from shared.weapon_detector import WeaponDetector
 logger = logging.getLogger(__name__)
 
 
+
 class LoadFile:
     @staticmethod
     def load_file(file_path):
         try:
             with open(file_path, "r", encoding="utf-8") as file:
+
                 return [line.strip() for line in file if line.strip()]
         except FileNotFoundError:
             logger.error(f"File not found: {file_path}")
@@ -91,6 +93,7 @@ class EnricherService:
             dict: Result of the processing operation
         """
         tweet_id = message.get("_id", "unknown")
+
         process_start_time = time.time()
 
         logger.info(f"Starting to process tweet {tweet_id} from topic '{input_topic}'")
@@ -198,6 +201,7 @@ class EnricherService:
                     f"Statistics: {self.processed_count} processed, {self.error_count} errors, avg processing time: {avg_time:.3f}s, rate: {rate:.2f} msg/s"
                 )
 
+
             return send_result
 
         except Exception as e:
@@ -278,8 +282,9 @@ if __name__ == "__main__":
         "Cleaning   TEXT??? is sometimes  tricky...",
         "Stopwords should be removed in this sentence.",
         "Running, runner, runs — all should be stemmed.",
-        "",  # Test empty string
-        "   ",  # Test string with only spaces
+        "",
+        "   ",
+
     ]
 
     text_processor_standalone = TextProcessing()

@@ -34,3 +34,4 @@ KAFKA_TOPIC_OUT_NOT_ANTISEMITIC = os.getenv(
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 LOG_KAFKA = os.getenv("LOG_KAFKA", "ERROR").upper()
 LOG_MONGO = os.getenv("LOG_MONGO", "ERROR").upper()
+

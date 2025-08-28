@@ -7,6 +7,7 @@ import config
 from shared.kafka_utils import AsyncKafkaProducer
 from shared.text_processing import TextProcessing
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -59,6 +60,7 @@ class PreprocessorService:
             dict: Result of the processing operation
         """
         tweet_id = message.get("_id", "unknown")
+
         process_start_time = time.time()
 
         logger.info(f"Starting to process tweet {tweet_id} from topic '{input_topic}'")
@@ -105,6 +107,7 @@ class PreprocessorService:
             processed_message["processed_at"] = datetime.now().isoformat()
             processed_message["original_topic"] = input_topic
 
+
             # Determine output topic
             output_topic = self._get_output_topic(input_topic, tweet_id)
             if not output_topic:
@@ -129,6 +132,7 @@ class PreprocessorService:
                 f"Successfully sent processed message to topic '{output_topic}' for tweet ID: {tweet_id} (processing time: {processing_time:.3f}s)"
             )
 
+
             # Log statistics every 100 processed messages
             if self.processed_count % 100 == 0:
                 avg_time = self.total_processing_time / self.processed_count
@@ -146,6 +150,7 @@ class PreprocessorService:
             logger.error(
                 f"Error processing tweet {tweet_id} after {processing_time:.3f}s: {str(e)}"
             )
+
             raise
 
     def _get_output_topic(self, input_topic: str, tweet_id: str) -> str:
@@ -188,6 +193,7 @@ class PreprocessorService:
             if self.processed_count > 0
             else 0
         )
+
         processing_rate = self.processed_count / uptime if uptime > 0 else 0
 
         return {
@@ -201,6 +207,7 @@ class PreprocessorService:
                 if self.processed_count > 0
                 else 0
             ),
+
         }
 
 
@@ -217,8 +224,9 @@ if __name__ == "__main__":
         "Cleaning   TEXT??? is sometimes  tricky...",
         "Stopwords should be removed in this sentence.",
         "Running, runner, runs — all should be stemmed.",
-        "",  # Test empty string
-        "   ",  # Test string with only spaces
+        "",
+        "   ",
+
     ]
 
     text_processor_standalone = TextProcessing()
@@ -236,3 +244,4 @@ if __name__ == "__main__":
         print("-" * 50)
 
     logger.info("Standalone test completed")
+

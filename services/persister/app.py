@@ -94,3 +94,4 @@ if __name__ == "__main__":
     except Exception as e:
         logger.critical(f"Critical error in main: {e}")
         raise
+

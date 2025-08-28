@@ -16,6 +16,7 @@ MONGO_COLLECTION_NOT_ANTISEMITIC = os.getenv(
 API_HOST = os.getenv("API_HOST", "0.0.0.0")
 API_PORT = int(os.getenv("API_PORT", 8082))
 
+
 # Logging
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 LOG_MONGO = os.getenv("LOG_MONGO", "ERROR").upper()
