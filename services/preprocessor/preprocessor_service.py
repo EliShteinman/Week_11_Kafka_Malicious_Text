@@ -23,10 +23,10 @@ class PreprocessorService:
         """
         self.text_cleaner = TextProcessing()
         self.kafka_producer = producer
-        self.input_topic_antisemitic = config.KAFKA_TOPIC_IN_1
-        self.input_topic_not_antisemitic = config.KAFKA_TOPIC_IN_2
-        self.output_topic_antisemitic = config.KAFKA_TOPIC_OUT_1
-        self.output_topic_not_antisemitic = config.KAFKA_TOPIC_OUT_2
+        self.input_topic_antisemitic = config.KAFKA_TOPIC_IN_ANTISEMITIC
+        self.input_topic_not_antisemitic = config.KAFKA_TOPIC_IN_NOT_ANTISEMITIC
+        self.output_topic_antisemitic = config.KAFKA_TOPIC_OUT_ANTISEMITIC
+        self.output_topic_not_antisemitic = config.KAFKA_TOPIC_OUT_NOT_ANTISEMITIC
         self.target_text_key = config.TARGET_KEY
 
         # Performance tracking

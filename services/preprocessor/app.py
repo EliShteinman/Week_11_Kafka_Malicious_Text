@@ -6,7 +6,7 @@ import logging
 from preprocessor_service import PreprocessorService
 
 logging.basicConfig(level=config.LOG_LEVEL)
-
+logging.getLogger("kafka").setLevel(level=config.LOG_KAFKA)
 logger = logging.getLogger(__name__)
 
 
@@ -22,7 +22,7 @@ async def main():
     logger.info(f"Initializing Kafka producer - Server: {config.KAFKA_URL}:{config.KAFKA_PORT}")
     producer = AsyncKafkaProducer(bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}")
     consumer = AsyncKafkaConsumer(
-        [config.KAFKA_TOPIC_IN_1, config.KAFKA_TOPIC_IN_2],
+        [config.KAFKA_TOPIC_IN_ANTISEMITIC, config.KAFKA_TOPIC_IN_NOT_ANTISEMITIC],
         bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}",
         group_id=config.KAFKA_GROUP_ID
     )
@@ -36,7 +36,7 @@ async def main():
         logger.error(f"Failed to start Kafka: {e}")
         return
 
-    logger.info(f"Starting to consume from topics: {config.KAFKA_TOPIC_IN_1}, {config.KAFKA_TOPIC_IN_2}")
+    logger.info(f"Starting to consume from topics: {config.KAFKA_TOPIC_IN_ANTISEMITIC}, {config.KAFKA_TOPIC_IN_NOT_ANTISEMITIC}")
     logger.info("Starting main processing loop...")
 
     # Performance tracking variables
