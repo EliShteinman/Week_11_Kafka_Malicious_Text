@@ -13,6 +13,8 @@ class TextProcessing:
 
     @staticmethod
     def clean_central(text):
+        if not text or text.isspace():
+            return ""
         return cleantext.clean(text,
                                lowercase=True,
                                extra_spaces=True,
