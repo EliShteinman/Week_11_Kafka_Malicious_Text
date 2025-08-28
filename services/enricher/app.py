@@ -3,7 +3,7 @@ import time
 from shared.kafka_utils import AsyncKafkaProducer, AsyncKafkaConsumer
 import config
 import logging
-from enricher_service import enricherservice
+from enricher_service import EnricherService
 
 logging.basicConfig(level=config.LOG_LEVEL)
 
@@ -24,11 +24,11 @@ async def main():
     logger.info(f"Initializing Kafka producer - Server: {config.KAFKA_URL}:{config.KAFKA_PORT}")
     producer = AsyncKafkaProducer(bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}")
     consumer = AsyncKafkaConsumer(
-        [config.KAFKA_TOPIC_IN_1, config.KAFKA_TOPIC_IN_2],
+        [config.KAFKA_TOPIC_IN_ANTISEMITIC, config.KAFKA_TOPIC_IN_NOT_ANTISEMITIC],
         bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}",
         group_id=config.KAFKA_GROUP_ID
     )
-    preprocessor = enricherservice(producer)
+    enricher = EnricherService(producer)
 
     try:
         await producer.start()
@@ -38,7 +38,7 @@ async def main():
         logger.error(f"Failed to start Kafka: {e}")
         return
 
-    logger.info(f"Starting to consume from topics: {config.KAFKA_TOPIC_IN_1}, {config.KAFKA_TOPIC_IN_2}")
+    logger.info(f"Starting to consume from topics: {config.KAFKA_TOPIC_IN_ANTISEMITIC}, {config.KAFKA_TOPIC_IN_NOT_ANTISEMITIC}")
     logger.info("Starting main processing loop...")
 
     # Performance tracking variables
@@ -58,7 +58,7 @@ async def main():
 
                 # Track processing time for each message
                 process_start_time = time.time()
-                result = await preprocessor.process_and_send_tweet(topic, tweet)
+                result = await enricher.process_and_send_tweet(topic, tweet)
                 processing_time = time.time() - process_start_time
 
                 logger.info(f"Processed tweet {tweet_id} in {processing_time:.3f}s")
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         logger.info("Application startup initiated")
         asyncio.run(main())
     except KeyboardInterrupt:
-        logger.info("Retriever service stopped by user")
+        logger.info("Enricher service stopped by user")
     except Exception as e:
         logger.critical(f"Critical error in main: {e}")
         raise

@@ -39,14 +39,18 @@ class EnricherService:
         """
         self.text_cleaner = TextProcessing()
         self.kafka_producer = producer
-        self.input_topic_antisemitic = config.KAFKA_TOPIC_IN_1
-        self.input_topic_not_antisemitic = config.KAFKA_TOPIC_IN_2
-        self.output_topic_antisemitic = config.KAFKA_TOPIC_OUT_1
-        self.output_topic_not_antisemitic = config.KAFKA_TOPIC_OUT_2
-        self.target_text_key = config.TARGET_KEY
+        self.input_topic_antisemitic = config.KAFKA_TOPIC_IN_ANTISEMITIC
+
+        self.input_topic_not_antisemitic = config.KAFKA_TOPIC_IN_NOT_ANTISEMITIC
+
+        self.output_topic_antisemitic = config.KAFKA_TOPIC_OUT_ANTISEMITIC
+
+        self.output_topic_not_antisemitic = config.KAFKA_TOPIC_OUT_NOT_ANTISEMITIC
+
+        self.target_text_key = config.TARGET_ORIGINAL
         self.sentiment_analyzer = SentimentAnalyzer()
 
-        weapons_file_path = "data/weapon_list.txt"
+        weapons_file_path = config.WEAPONS_FILE_PATH
         self.weapons_list = LoadFile.load_file(weapons_file_path)
         if not self.weapons_list:
             logger.warning(f"No weapons loaded from {weapons_file_path}. Weapon detection will not function.")
@@ -85,32 +89,49 @@ class EnricherService:
             processed_message = message.copy()
             original_text = processed_message.get(self.target_text_key, "")
 
-            # Handle missing text
-            if not original_text:
-                logger.warning(
-                    f"Tweet {tweet_id} missing '{self.target_text_key}' key. Skipping text cleaning.")
-                cleaned_text = ""
+            # Use the already cleaned text from the previous stage, if available
+            # Otherwise, clean the original text
+            text_for_enrichment = processed_message.get('clean_text', original_text)
+
+            # If no text is available, log and skip enrichment
+            if not text_for_enrichment:
+                logger.warning(f"Tweet {tweet_id} has no text for enrichment. Skipping.")
+                processed_message['sentiment'] = 'neutral'
+                processed_message['weapons_detected'] = []
+                processed_message['relevant_timestamp'] = None
             else:
-                # Track text processing metrics
-                text_length_before = len(original_text)
+                # 1. Sentiment Analysis
+                sentiment_score = self.sentiment_analyzer.get_sentiment_score(text_for_enrichment)
+                sentiment_label = self.sentiment_analyzer.convert_to_sentiment_label(sentiment_score, config.SENTIMENT_THRESHOLD_POSITIVE, config.SENTIMENT_THRESHOLD_NEGATIVE)
+                processed_message['sentiment'] = sentiment_label
+                logger.debug(f"Tweet {tweet_id} - Sentiment: {sentiment_label} (Score: {sentiment_score:.3f})")
 
-                # Clean the text
-                text_clean_start = time.time()
-                cleaned_text = self.text_cleaner.clean_central(original_text)
-                text_clean_time = time.time() - text_clean_start
+                # 2. Weapon Detection (on cleaned text for better accuracy)
+                detected_weapons = self.weapon_detector.find_weapons(text_for_enrichment)
+                processed_message['weapons_detected'] = detected_weapons if detected_weapons else []
+                logger.debug(f"Tweet {tweet_id} - Detected weapons: {detected_weapons}")
 
-                text_length_after = len(cleaned_text)
-                reduction_percent = ((
-                                                 text_length_before - text_length_after) / text_length_before * 100) if text_length_before > 0 else 0
+                # 3. Timestamp Extraction (on original text for full context)
+                # The requirement states "within the content of the text (date only, no time)"
+                # Assuming Time_extractor.DateTimeExtractor returns a list of detected dates.
+                # We need to pick the latest one if multiple are found.
+                extracted_timestamps = self.time_extractor.DateTimeExtractor(original_text)
+                relevant_timestamp = None
+                if extracted_timestamps:
+                    try:
+                        # Try to parse and find the latest date
+                        parsed_dates = [datetime.strptime(ts, "%Y-%m-%d").date() for ts in extracted_timestamps]
+                        relevant_timestamp = max(parsed_dates).isoformat()
+                    except ValueError:
+                        logger.warning(
+                            f"Tweet {tweet_id} - Could not parse all extracted timestamps: {extracted_timestamps}")
+                        # Fallback to just taking the first one if parsing fails, or keep None
+                        relevant_timestamp = extracted_timestamps[0]
 
-                logger.debug(
-                    f"Tweet {tweet_id} - Text cleaning: {text_length_before} chars -> {text_length_after} chars ({reduction_percent:.1f}% reduction) in {text_clean_time:.3f}s")
-                logger.debug(f"Original: '{original_text[:100]}...' | Cleaned: '{cleaned_text[:100]}...'")
+                processed_message['relevant_timestamp'] = relevant_timestamp
+                logger.debug(f"Tweet {tweet_id} - Extracted timestamp: {relevant_timestamp}")
 
-            # Add cleaned text and processing metadata
-            processed_message['clean_text'] = cleaned_text
-            processed_message['processed_at'] = datetime.now().isoformat()
-            processed_message['original_topic'] = input_topic
+            processed_message['enriched_at'] = datetime.now().isoformat()
 
             # Determine output topic
             output_topic = self._get_output_topic(input_topic, tweet_id)
@@ -118,8 +139,8 @@ class EnricherService:
                 self.error_count += 1
                 return {"status": "error", "reason": f"Unknown input topic: {input_topic}"}
 
-            # Send processed message to Kafka
-            logger.debug(f"Sending tweet {tweet_id} to topic '{output_topic}'")
+            # Send enriched message to Kafka
+            logger.debug(f"Sending enriched tweet {tweet_id} to topic '{output_topic}'")
             send_result = await self.kafka_producer.send_json(output_topic, processed_message)
 
             # Update statistics
@@ -128,7 +149,7 @@ class EnricherService:
             self.total_processing_time += processing_time
 
             logger.info(
-                f"Successfully sent processed message to topic '{output_topic}' for tweet ID: {tweet_id} (processing time: {processing_time:.3f}s)")
+                f"Successfully sent enriched message to topic '{output_topic}' for tweet ID: {tweet_id} (processing time: {processing_time:.3f}s)")
 
             # Log statistics every 100 processed messages
             if self.processed_count % 100 == 0:
@@ -144,6 +165,7 @@ class EnricherService:
             self.error_count += 1
             processing_time = time.time() - process_start_time
             logger.error(f"Error processing tweet {tweet_id} after {processing_time:.3f}s: {str(e)}")
+            # Consider if you want to re-raise or just log and continue
             raise
 
     def _get_output_topic(self, input_topic: str, tweet_id: str) -> str:

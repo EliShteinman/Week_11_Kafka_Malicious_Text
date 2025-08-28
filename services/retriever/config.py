@@ -3,10 +3,11 @@ import os
 # MongoDB Configuration
 MONGO_ATLAS_URI = os.getenv("MONGO_ATLAS_URI", "")
 MONGO_HOST = os.getenv("MONGO_HOST", "localhost")
+MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "IranMalDB")
 MONGO_PORT = int(os.getenv("MONGO_PORT", 27017))
 MONGO_USER = os.getenv("MONGO_USER", "")
 MONGO_PASSWORD = os.getenv("MONGO_PASSWORD", "")
-MONGO_COLLECTION_RAW_TWEETS = os.getenv("MONGO_COLLECTION_RAW_TWEETS", "IranMalDB")
+MONGO_COLLECTION_RAW_TWEETS = os.getenv("MONGO_COLLECTION_RAW_TWEETS", "tweets")
 MONGO_CLASSIFICATION_FIELD = os.getenv("MONGO_CLASSIFICATION_FIELD", "Antisemitic")
 
 # Build MongoDB URI
