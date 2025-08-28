@@ -1,19 +1,15 @@
 import os
 
-
-# Read configuration from environment variables in a central place.
+# MongoDB Configuration
 MONGO_ATLAS_URI = os.getenv("MONGO_ATLAS_URI", "")
 MONGO_HOST = os.getenv("MONGO_HOST", "localhost")
 MONGO_PORT = int(os.getenv("MONGO_PORT", 27017))
 MONGO_USER = os.getenv("MONGO_USER", "")
 MONGO_PASSWORD = os.getenv("MONGO_PASSWORD", "")
-MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "IranMalDB")
-MONGO_COLLECTION_NAME = os.getenv("MONGO_COLLECTION_NAME", "tweets")
-MONGO_TARGET_COLUM = os.getenv("MONGO_TARGET_COLUM", "Antisemitic")
+MONGO_COLLECTION_RAW_TWEETS = os.getenv("MONGO_COLLECTION_RAW_TWEETS", "IranMalDB")
+MONGO_CLASSIFICATION_FIELD = os.getenv("MONGO_CLASSIFICATION_FIELD", "Antisemitic")
 
-# Build the MongoDB Connection URI.
-# If a username and password are provided, build a URI with authentication (for OpenShift).
-# Otherwise, build a simpler URI for local, unauthenticated development.
+# Build MongoDB URI
 if MONGO_ATLAS_URI:
     MONGO_URI = MONGO_ATLAS_URI
 elif MONGO_USER and MONGO_PASSWORD:
@@ -21,10 +17,15 @@ elif MONGO_USER and MONGO_PASSWORD:
 else:
     MONGO_URI = f"mongodb://{MONGO_HOST}:{MONGO_PORT}/"
 
-
+# Kafka Configuration
 KAFKA_URL = os.environ.get("KAFKA_URL", "localhost")
 KAFKA_PORT = int(os.environ.get("KAFKA_PORT", 9092))
+
+# Kafka Output Topics - where retriever sends data
+KAFKA_TOPIC_OUT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_OUT_ANTISEMITIC", "raw_tweets_antisemitic")
+KAFKA_TOPIC_OUT_NOT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_OUT_NOT_ANTISEMITIC", "raw_tweets_not_antisemitic")
+
+# Logging Configuration
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 LOG_KAFKA = os.getenv("LOG_KAFKA", "ERROR").upper()
-KAFKA_TOPIC_1 = os.getenv("KAFKA_TOPIC", "raw_tweets_antisemitic")
-KAFKA_TOPIC_2 = os.getenv("KAFKA_TOPIC_2", "raw_tweets_not_antisemitic")
+LOG_MONGO = os.getenv("LOG_MONGO", "ERROR").upper()

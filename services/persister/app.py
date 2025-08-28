@@ -6,6 +6,8 @@ import logging
 import asyncio
 
 logging.basicConfig(level=config.LOG_LEVEL)
+logging.getLogger("pymongo").setLevel(level=config.LOG_MONGO)
+logging.getLogger("kafka").setLevel(level=config.LOG_KAFKA)
 logger = logging.getLogger(__name__)
 
 

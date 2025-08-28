@@ -35,3 +35,4 @@ KAFKA_GROUP_ID = os.getenv("KAFKA_GROUP_ID", "persister_service")
 # Logging
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 LOG_KAFKA = os.getenv("LOG_KAFKA", "ERROR").upper()
+LOG_MONGO = os.getenv("LOG_MONGO", "ERROR").upper()
