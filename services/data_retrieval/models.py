@@ -13,10 +13,10 @@ class TweetModel(BaseModel):
     createdate: datetime = Field(
         ..., alias="CreateDate", description="Original creation date"
     )
-    antisemitic: int = Field(
+    antisemietic: int = Field(
         ..., alias="Antisemitic", description="0 or 1 - antisemitic classification"
     )
-    original_text: str = Field(..., alias="text", description="Original tweet text")
+    text_original: str = Field(..., alias="text", description="Original tweet text")
     clean_text: str = Field(..., description="Processed/cleaned text")
     sentiment: str = Field(..., description="positive/negative/neutral")
     weapons_detected: List[str] = Field(

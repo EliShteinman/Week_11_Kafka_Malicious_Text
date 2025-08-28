@@ -148,7 +148,7 @@ services:
       KAFKA_TOPIC_IN_NOT_ANTISEMITIC: "preprocessed_tweets_not_antisemitic"
       KAFKA_TOPIC_OUT_ANTISEMITIC: "enriched_preprocessed_tweets_antisemitic"
       KAFKA_TOPIC_OUT_NOT_ANTISEMITIC: "enriched_preprocessed_tweets_not_antisemitic"
-      TARGET_ORIGINAL: "text"
+      ORIGINAL_TEXT_FIELD: "text"
       TARGET_PROCESSED: "clean_text"
       KAFKA_GROUP_ID: "enricher-group"
       WEAPONS_FILE_PATH: "data/weapon_list.txt"
@@ -176,7 +176,7 @@ services:
       MONGO_COLLECTION_ANTISEMITIC: "tweets_antisemitic"
       MONGO_COLLECTION_NOT_ANTISEMITIC: "tweets_not_antisemitic"
       KAFKA_TOPIC_IN_ANTISEMITIC: "enriched_preprocessed_tweets_antisemitic"
-      KAFKA_TOPIC_IN_NOT_ANTISEMITIC: "enriched_preprocessed_tweets_not_antisemitic"  # שם עקבי
+      KAFKA_TOPIC_IN_NOT_ANTISEMITIC: "enriched_preprocessed_tweets_not_antisemitic"
       KAFKA_GROUP_ID: "persister-group"
       LOG_LEVEL: "INFO"
       LOG_KAFKA: "ERROR"

@@ -30,7 +30,7 @@ KAFKA_TOPIC_OUT_NOT_ANTISEMITIC = os.getenv(
 )
 
 # Processing configuration
-TARGET_ORIGINAL = os.getenv(
+ORIGINAL_TEXT_FIELD = os.getenv(
     "TARGET_KEY", "text"
 )  # Key name for text content in tweet messages
 TARGET_PROCESSED = os.getenv(
