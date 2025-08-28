@@ -164,3 +164,4 @@ cython_debug/
 מבנה תיקיות.md
 shared/nltk_data
 test.ipynb
+*requirements.in
