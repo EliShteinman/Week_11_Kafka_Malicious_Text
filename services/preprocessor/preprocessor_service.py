@@ -1,11 +1,17 @@
 from shared.text_processing import TextProcessing
 from shared.kafka_utils import AsyncKafkaProducer
-
+import config
 
 class PreprocessorService:
-    def __init__(self):
+    def __init__(self, producer: AsyncKafkaProducer):
         self.cleaner = TextProcessing()
-        self.producer = AsyncKafkaProducer(bootstrap_servers='localhost:9092')
+        self.producer = producer
+        self.topic_in_1 = config.KAFKA_TOPIC_IN_1
+        self.topic_in_2 = config.KAFKA_TOPIC_IN_2
+        self.topic_out_1 = config.KAFKA_TOPIC_OUT_1
+        self.topic_out_2 = config.KAFKA_TOPIC_OUT_2
+        self.target_key = config.TARGET_KEY
+
 
     async def process_text(self,topic:str, message: dict) -> dict:
         d= message
