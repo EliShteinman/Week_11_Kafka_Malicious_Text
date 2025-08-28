@@ -13,12 +13,12 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 LOG_KAFKA = os.getenv("LOG_KAFKA", "ERROR").upper()
 
 # Input topics - where raw tweets are consumed from
-KAFKA_TOPIC_IN_1 = os.getenv("KAFKA_TOPIC", "raw_tweets_antisemitic")
-KAFKA_TOPIC_IN_2 = os.getenv("KAFKA_TOPIC_2", "raw_tweets_not_antisemitic")
+KAFKA_TOPIC_IN_ANTISEMITIC = os.getenv("KAFKA_TOPIC_IN_ANTISEMITIC", "raw_tweets_antisemitic")
+KAFKA_TOPIC_IN_NOT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_IN_NOT_ANTISEMITIC", "raw_tweets_not_antisemitic")
 
 # Output topics - where processed tweets are sent to
-KAFKA_TOPIC_OUT_1 = os.getenv("KAFKA_TOPIC_OUT_1", "processed_tweets_antisemitic")
-KAFKA_TOPIC_OUT_2 = os.getenv("KAFKA_TOPIC_OUT_2", "processed_tweets_not_antisemitic")
+KAFKA_TOPIC_OUT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_OUT_ANTISEMITIC", "processed_tweets_antisemitic")
+KAFKA_TOPIC_OUT_NOT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_OUT_NOT_ANTISEMITIC", "processed_tweets_not_antisemitic")
 
 # Processing configuration
 TARGET_KEY = os.getenv("TARGET_KEY", "text")  # Key name for text content in tweet messages
