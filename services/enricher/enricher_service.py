@@ -13,7 +13,6 @@ from shared.weapon_detector import WeaponDetector
 logger = logging.getLogger(__name__)
 
 
-
 class LoadFile:
     @staticmethod
     def load_file(file_path):
@@ -201,7 +200,6 @@ class EnricherService:
                     f"Statistics: {self.processed_count} processed, {self.error_count} errors, avg processing time: {avg_time:.3f}s, rate: {rate:.2f} msg/s"
                 )
 
-
             return send_result
 
         except Exception as e:
@@ -284,7 +282,6 @@ if __name__ == "__main__":
         "Running, runner, runs — all should be stemmed.",
         "",
         "   ",
-
     ]
 
     text_processor_standalone = TextProcessing()

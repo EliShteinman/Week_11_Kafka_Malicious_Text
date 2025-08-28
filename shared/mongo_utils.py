@@ -38,7 +38,7 @@ class SingletonMongoClient(AsyncMongoClient):
                 "collection_name": collection_name,
             }
             self._initialized = True
-            logger.info(f"MongoDB client initialized successfully")
+            logger.info("MongoDB client initialized successfully")
         else:
             logger.debug("MongoDB client already initialized, skipping initialization")
 
@@ -127,4 +127,3 @@ class SingletonMongoClient(AsyncMongoClient):
         except Exception as e:
             logger.error(f"Unexpected error during MongoDB health check: {e}")
             return {"status": "unhealthy", "error": f"Unexpected error: {str(e)}"}
-

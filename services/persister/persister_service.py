@@ -4,7 +4,6 @@ from typing import Any, Dict
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
 
-
 logger = logging.getLogger(__name__)
 
 

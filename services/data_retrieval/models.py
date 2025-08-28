@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel, Field
 
@@ -32,4 +32,3 @@ class TweetModel(BaseModel):
 class TweetResponse(BaseModel):
     count: int = Field(..., description="Number of tweets returned")
     data: List[TweetModel] = Field(..., description="List of tweets")
-

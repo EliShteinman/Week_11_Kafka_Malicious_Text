@@ -2,6 +2,7 @@
 Configuration module for the tweet preprocessing service.
 Contains all environment variable definitions and default values.
 """
+
 import os
 
 # Kafka connection settings

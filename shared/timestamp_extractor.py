@@ -8,7 +8,7 @@ class Time_extractor:
         # Consolidated regex with many possible timestamps
         self.reg = "|".join(self.DateTimeRegex.values())
 
-    ## Function to remove some special characters
+    # Function to remove some special characters
     def preprocess(self, x):
         x = x.replace("\t", " ")
         x = x.replace("\n", " ")
@@ -23,7 +23,7 @@ class Time_extractor:
         x = x.replace("'", "")
         return x
 
-    ## Function to extract date and time
+    # Function to extract date and time
     def DateTimeExtractor(self, x):
         x = self.preprocess(x)
         DT = re.findall(self.reg, x)
