@@ -17,8 +17,8 @@ KAFKA_TOPIC_IN_ANTISEMITIC = os.getenv("KAFKA_TOPIC_IN_ANTISEMITIC", "raw_tweets
 KAFKA_TOPIC_IN_NOT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_IN_NOT_ANTISEMITIC", "raw_tweets_not_antisemitic")
 
 # Output topics - where processed tweets are sent to
-KAFKA_TOPIC_OUT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_OUT_ANTISEMITIC", "processed_tweets_antisemitic")
-KAFKA_TOPIC_OUT_NOT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_OUT_NOT_ANTISEMITIC", "processed_tweets_not_antisemitic")
+KAFKA_TOPIC_OUT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_OUT_ANTISEMITIC", "preprocessed_tweets_antisemitic")
+KAFKA_TOPIC_OUT_NOT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_OUT_NOT_ANTISEMITIC", "preprocessed_tweets_not_antisemitic")
 
 # Processing configuration
 TARGET_KEY = os.getenv("TARGET_KEY", "text")  # Key name for text content in tweet messages
