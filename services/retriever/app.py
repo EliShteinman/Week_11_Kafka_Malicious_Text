@@ -1,9 +1,11 @@
 import asyncio
-from shared.mongo_utils import SingletonMongoClient
-from shared.kafka_utils import AsyncKafkaProducer
-from retriever_service import RetrieverData
-import config
 import logging
+
+import config
+from retriever_service import RetrieverData
+
+from shared.kafka_utils import AsyncKafkaProducer
+from shared.mongo_utils import SingletonMongoClient
 
 logging.basicConfig(level=config.LOG_LEVEL)
 logging.getLogger("pymongo").setLevel(level=config.LOG_MONGO)
@@ -30,8 +32,12 @@ async def main():
     retriever = RetrieverData(collection)
     logger.info(f"RetrieverData service initialized")
 
-    logger.info(f"Initializing Kafka producer - Server: {config.KAFKA_URL}:{config.KAFKA_PORT}")
-    producer = AsyncKafkaProducer(bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}")
+    logger.info(
+        f"Initializing Kafka producer - Server: {config.KAFKA_URL}:{config.KAFKA_PORT}"
+    )
+    producer = AsyncKafkaProducer(
+        bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}"
+    )
     try:
         await producer.start()
         logger.info("Kafka producer started successfully")
@@ -58,19 +64,28 @@ async def main():
                 for tweet in tweets:
                     try:
                         if tweet.get(config.MONGO_CLASSIFICATION_FIELD):
-                            await producer.send_json(config.KAFKA_TOPIC_OUT_ANTISEMITIC, tweet)
+                            await producer.send_json(
+                                config.KAFKA_TOPIC_OUT_ANTISEMITIC, tweet
+                            )
                             antisemitic_count += 1
-                            logger.debug(f"Sent antisemitic tweet to {config.KAFKA_TOPIC_OUT_ANTISEMITIC}")
+                            logger.debug(
+                                f"Sent antisemitic tweet to {config.KAFKA_TOPIC_OUT_ANTISEMITIC}"
+                            )
                         else:
-                            await producer.send_json(config.KAFKA_TOPIC_OUT_NOT_ANTISEMITIC, tweet)
+                            await producer.send_json(
+                                config.KAFKA_TOPIC_OUT_NOT_ANTISEMITIC, tweet
+                            )
                             not_antisemitic_count += 1
-                            logger.debug(f"Sent non-antisemitic tweet to {config.KAFKA_TOPIC_OUT_NOT_ANTISEMITIC}")
+                            logger.debug(
+                                f"Sent non-antisemitic tweet to {config.KAFKA_TOPIC_OUT_NOT_ANTISEMITIC}"
+                            )
                     except Exception as e:
                         logger.error(f"Failed to send tweet to Kafka: {e}")
                         logger.debug(f"Tweet data: {tweet.get('_id', 'unknown_id')}")
 
                 logger.info(
-                    f"Processing complete - Antisemitic: {antisemitic_count}, Not antisemitic: {not_antisemitic_count}")
+                    f"Processing complete - Antisemitic: {antisemitic_count}, Not antisemitic: {not_antisemitic_count}"
+                )
             else:
                 logger.debug("No new tweets found in this poll")
 

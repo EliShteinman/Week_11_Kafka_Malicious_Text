@@ -1,5 +1,6 @@
 import logging
 from typing import List
+
 from bson import ObjectId
 from pymongo.errors import PyMongoError
 
@@ -23,7 +24,9 @@ class RetrieverData:
             logger.info("First run - retrieving all messages")
         else:
             query = {"CreateDate": {"$gt": self.latest_message_time}}
-            logger.info(f"Retrieving messages created after: {self.latest_message_time}")
+            logger.info(
+                f"Retrieving messages created after: {self.latest_message_time}"
+            )
 
         try:
             logger.debug(f"Executing MongoDB query: {query}")
@@ -50,15 +53,21 @@ class RetrieverData:
                     logger.debug(f"Processed {processed_count} messages so far...")
 
             if items:
-                logger.info(f"Successfully retrieved {len(items)} messages from MongoDB")
-                logger.debug(f"Latest message time updated to: {self.latest_message_time}")
+                logger.info(
+                    f"Successfully retrieved {len(items)} messages from MongoDB"
+                )
+                logger.debug(
+                    f"Latest message time updated to: {self.latest_message_time}"
+                )
             else:
                 logger.debug("No messages found matching the query")
 
             return items
 
         except PyMongoError as e:
-            logger.error(f"PyMongo error retrieving data since {self.latest_message_time}: {e}")
+            logger.error(
+                f"PyMongo error retrieving data since {self.latest_message_time}: {e}"
+            )
             raise RuntimeError(f"Database operation failed: {e}")
         except Exception as e:
             logger.error(f"Unexpected error in receive_messages_from: {e}")

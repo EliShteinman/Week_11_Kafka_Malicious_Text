@@ -23,8 +23,12 @@ KAFKA_URL = os.environ.get("KAFKA_URL", "localhost")
 KAFKA_PORT = int(os.environ.get("KAFKA_PORT", 9092))
 
 # Kafka Output Topics - where retriever sends data
-KAFKA_TOPIC_OUT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_OUT_ANTISEMITIC", "raw_tweets_antisemitic")
-KAFKA_TOPIC_OUT_NOT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_OUT_NOT_ANTISEMITIC", "raw_tweets_not_antisemitic")
+KAFKA_TOPIC_OUT_ANTISEMITIC = os.getenv(
+    "KAFKA_TOPIC_OUT_ANTISEMITIC", "raw_tweets_antisemitic"
+)
+KAFKA_TOPIC_OUT_NOT_ANTISEMITIC = os.getenv(
+    "KAFKA_TOPIC_OUT_NOT_ANTISEMITIC", "raw_tweets_not_antisemitic"
+)
 
 # Logging Configuration
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()

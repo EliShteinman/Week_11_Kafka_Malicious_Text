@@ -1,8 +1,10 @@
-from shared.mongo_utils import SingletonMongoClient
-from typing import List, Dict, Any
 import logging
-from bson import ObjectId
 from datetime import datetime
+from typing import Any, Dict, List
+
+from bson import ObjectId
+
+from shared.mongo_utils import SingletonMongoClient
 
 logger = logging.getLogger(__name__)
 
@@ -16,12 +18,16 @@ class TweetRepository:
         self.mongo_client = mongo_client
         logger.info("TweetRepository initialized")
 
-    async def get_tweets_from_collection(self, collection_name: str) -> List[Dict[str, Any]]:
+    async def get_tweets_from_collection(
+        self, collection_name: str
+    ) -> List[Dict[str, Any]]:
         """
         Retrieve all tweets from specified collection with proper data conversion
         """
         try:
-            collection = self.mongo_client.get_collection(collection_name=collection_name)
+            collection = self.mongo_client.get_collection(
+                collection_name=collection_name
+            )
             tweets = []
 
             async for tweet in collection.find():
@@ -36,9 +42,13 @@ class TweetRepository:
 
                 tweets.append(tweet)
 
-            logger.info(f"Retrieved {len(tweets)} tweets from collection '{collection_name}'")
+            logger.info(
+                f"Retrieved {len(tweets)} tweets from collection '{collection_name}'"
+            )
             return tweets
 
         except Exception as e:
-            logger.error(f"Error retrieving tweets from collection '{collection_name}': {e}")
+            logger.error(
+                f"Error retrieving tweets from collection '{collection_name}': {e}"
+            )
             raise

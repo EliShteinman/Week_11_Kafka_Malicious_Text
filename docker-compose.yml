@@ -1,0 +1,193 @@
+name: myproject
+services:
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka
+    restart: unless-stopped
+    environment:
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:29093"
+      CLUSTER_ID: "GN6dEcxIR16qMCV7CauyTw"
+      KAFKA_CLUSTER_ID: "GN6dEcxIR16qMCV7CauyTw"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    networks:
+      - kafka_internal
+    healthcheck:
+      test: ["CMD-SHELL", "bash -lc 'echo > /dev/tcp/127.0.0.1/29092'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    restart: unless-stopped
+    depends_on:
+      kafka: { condition: service_healthy }
+    ports:
+      - "9080:8080"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: "true"
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    networks:
+      - kafka_internal
+      - frontend
+
+  mongodb:
+    image: mongo:latest
+    restart: unless-stopped
+    networks:
+      - kafka_internal
+    healthcheck:
+      test: ["CMD","mongosh","--quiet","--eval","db.adminCommand('ping').ok ? 0 : 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+
+  mongo-express:
+    image: mongo-express:latest
+    restart: unless-stopped
+    depends_on:
+      mongodb: { condition: service_healthy }
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH: "false"
+    networks:
+      - kafka_internal
+      - frontend
+
+  data-retrieval:
+    build:
+      context: .
+      dockerfile: services/data_retrieval/Dockerfile
+    restart: unless-stopped
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/
+      MONGO_DB_NAME: processed_tweets
+      MONGO_COLLECTION_ANTISEMITIC: tweets_antisemitic
+      MONGO_COLLECTION_NOT_ANTISEMITIC: tweets_not_antisemitic
+      LOG_LEVEL: INFO
+      LOG_MONGO: ERROR
+    depends_on:
+      mongodb: { condition: service_healthy }
+    networks:
+      - kafka_internal
+      - frontend
+    ports:
+      - "8082:8082"
+
+  retriever:
+    build:
+      context: .
+      dockerfile: services/retriever/Dockerfile
+    restart: unless-stopped
+    environment:
+      MONGO_ATLAS_URI: "mongodb+srv://IRGC_NEW:iran135@cluster0.6ycjkak.mongodb.net/"
+      MONGO_DB_NAME: "IranMalDB"
+      MONGO_COLLECTION_RAW_TWEETS: "tweets"
+      MONGO_CLASSIFICATION_FIELD: "Antisemitic"
+      KAFKA_URL: "kafka"
+      KAFKA_PORT: "29092"
+      KAFKA_TOPIC_OUT_ANTISEMITIC: "raw_tweets_antisemitic"
+      KAFKA_TOPIC_OUT_NOT_ANTISEMITIC: "raw_tweets_not_antisemitic"
+      KAFKA_GROUP_ID: "retrieve-group"
+      LOG_LEVEL: "INFO"
+      LOG_KAFKA: "ERROR"
+      LOG_MONGO: "ERROR"
+    depends_on:
+      kafka: { condition: service_healthy }
+    networks:
+      - kafka_internal
+      - egress
+
+  preprocessor:
+    build:
+      context: .
+      dockerfile: services/preprocessor/Dockerfile
+    restart: unless-stopped
+    environment:
+      KAFKA_URL: "kafka"
+      KAFKA_PORT: "29092"
+      KAFKA_TOPIC_IN_ANTISEMITIC: "raw_tweets_antisemitic"
+      KAFKA_TOPIC_IN_NOT_ANTISEMITIC: "raw_tweets_not_antisemitic"
+      KAFKA_TOPIC_OUT_ANTISEMITIC: "preprocessed_tweets_antisemitic"
+      KAFKA_TOPIC_OUT_NOT_ANTISEMITIC: "preprocessed_tweets_not_antisemitic"
+      TARGET_KEY: "text"
+      KAFKA_GROUP_ID: "preprocessor-group"
+      LOG_LEVEL: "INFO"
+      LOG_KAFKA: "ERROR"
+    depends_on:
+      kafka: { condition: service_healthy }
+    networks:
+      - kafka_internal
+      - egress
+
+  enricher:
+    build:
+      context: .
+      dockerfile: services/enricher/Dockerfile
+    restart: unless-stopped
+    environment:
+      KAFKA_URL: "kafka"
+      KAFKA_PORT: "29092"
+      KAFKA_TOPIC_IN_ANTISEMITIC: "preprocessed_tweets_antisemitic"
+      KAFKA_TOPIC_IN_NOT_ANTISEMITIC: "preprocessed_tweets_not_antisemitic"
+      KAFKA_TOPIC_OUT_ANTISEMITIC: "enriched_preprocessed_tweets_antisemitic"
+      KAFKA_TOPIC_OUT_NOT_ANTISEMITIC: "enriched_preprocessed_tweets_not_antisemitic"
+      TARGET_ORIGINAL: "text"
+      TARGET_PROCESSED: "clean_text"
+      KAFKA_GROUP_ID: "enricher-group"
+      WEAPONS_FILE_PATH: "data/weapons.txt"
+      SENTIMENT_THRESHOLD_NEGATIVE: "-0.5"
+      SENTIMENT_THRESHOLD_POSITIVE: "0.5"
+      LOG_LEVEL: "INFO"
+      LOG_KAFKA: "ERROR"
+    depends_on:
+      kafka: { condition: service_healthy }
+    networks:
+      - kafka_internal
+      - egress
+
+  persister:
+    build:
+      context: .
+      dockerfile: services/persister/Dockerfile
+    restart: unless-stopped
+    environment:
+      KAFKA_URL: "kafka"
+      KAFKA_PORT: "29092"
+      MONGO_HOST: "mongodb"
+      MONGO_PORT: "27017"
+      MONGO_DB_NAME: "IranMalDB"
+      MONGO_COLLECTION_ANTISEMITIC: "tweets_antisemitic"
+      MONGO_COLLECTION_NOT_ANTISEMITIC: "tweets_not_antisemitic"
+      KAFKA_TOPIC_IN_ANTISEMITIC: "enriched_preprocessed_tweets_antisemitic"
+      KAFKA_TOPIC_IN_NOT_ANTISEMITIC: "enriched_preprocessed_tweets_not_antisemitic"  # שם עקבי
+      KAFKA_GROUP_ID: "persister-group"
+      LOG_LEVEL: "INFO"
+      LOG_KAFKA: "ERROR"
+      LOG_MONGO: "ERROR"
+    depends_on:
+      kafka: { condition: service_healthy }
+      mongodb: { condition: service_healthy }
+    networks:
+      - kafka_internal
+
+networks:
+  kafka_internal:
+    internal: true
+  egress: {}
+  frontend: {}

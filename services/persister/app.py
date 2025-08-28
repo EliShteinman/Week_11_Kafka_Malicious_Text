@@ -1,9 +1,11 @@
-from shared.kafka_utils import AsyncKafkaConsumer
-from shared.mongo_utils import SingletonMongoClient
+import asyncio
+import logging
+
 import config
 from persister_service import TweetDAL
-import logging
-import asyncio
+
+from shared.kafka_utils import AsyncKafkaConsumer
+from shared.mongo_utils import SingletonMongoClient
 
 logging.basicConfig(level=config.LOG_LEVEL)
 logging.getLogger("pymongo").setLevel(level=config.LOG_MONGO)
@@ -20,9 +22,15 @@ async def main():
     logger.info("MongoDB client connected successfully")
 
     # Initialize collections
-    antisemitic_collection = client.get_collection(collection_name=config.MONGO_COLLECTION_ANTISEMITIC)
-    normal_collection = client.get_collection(collection_name=config.MONGO_COLLECTION_NOT_ANTISEMITIC)
-    logger.info(f"Collections initialized: {config.MONGO_COLLECTION_ANTISEMITIC}, {config.MONGO_COLLECTION_NOT_ANTISEMITIC}")
+    antisemitic_collection = client.get_collection(
+        collection_name=config.MONGO_COLLECTION_ANTISEMITIC
+    )
+    normal_collection = client.get_collection(
+        collection_name=config.MONGO_COLLECTION_NOT_ANTISEMITIC
+    )
+    logger.info(
+        f"Collections initialized: {config.MONGO_COLLECTION_ANTISEMITIC}, {config.MONGO_COLLECTION_NOT_ANTISEMITIC}"
+    )
 
     # Initialize DAL objects
     antisemitic_dal = TweetDAL(antisemitic_collection)
@@ -32,7 +40,7 @@ async def main():
     consumer = AsyncKafkaConsumer(
         [config.KAFKA_TOPIC_ANTISEMITIC, config.KAFKA_TOPIC_NOT_ANTISEMITIC],
         bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}",
-        group_id=config.KAFKA_GROUP_ID
+        group_id=config.KAFKA_GROUP_ID,
     )
 
     try:

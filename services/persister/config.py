@@ -9,8 +9,12 @@ MONGO_PASSWORD = os.getenv("MONGO_PASSWORD", "")
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "IranMalDB")
 
 # MongoDB Collections - matching the data flow
-MONGO_COLLECTION_ANTISEMITIC = os.getenv("MONGO_COLLECTION_ANTISEMITIC", "tweets_antisemitic")
-MONGO_COLLECTION_NOT_ANTISEMITIC = os.getenv("MONGO_COLLECTION_NOT_ANTISEMITIC", "tweets_not_antisemitic")
+MONGO_COLLECTION_ANTISEMITIC = os.getenv(
+    "MONGO_COLLECTION_ANTISEMITIC", "tweets_antisemitic"
+)
+MONGO_COLLECTION_NOT_ANTISEMITIC = os.getenv(
+    "MONGO_COLLECTION_NOT_ANTISEMITIC", "tweets_not_antisemitic"
+)
 MONGO_TARGET_COLUMN = os.getenv("MONGO_TARGET_COLUMN", "Antisemitic")
 
 # Build MongoDB URI
@@ -26,8 +30,12 @@ KAFKA_URL = os.environ.get("KAFKA_URL", "localhost")
 KAFKA_PORT = int(os.environ.get("KAFKA_PORT", 9092))
 
 # Kafka Topics - matching the data flow
-KAFKA_TOPIC_ANTISEMITIC = os.getenv("KAFKA_TOPIC_ANTISEMITIC", "enriched_preprocessed_tweets_antisemitic")
-KAFKA_TOPIC_NOT_ANTISEMITIC = os.getenv("KAFKA_TOPIC_NOT_ANTISEMITIC", "enriched_preprocessed_tweets_not_antisemitic")
+KAFKA_TOPIC_ANTISEMITIC = os.getenv(
+    "KAFKA_TOPIC_ANTISEMITIC", "enriched_preprocessed_tweets_antisemitic"
+)
+KAFKA_TOPIC_NOT_ANTISEMITIC = os.getenv(
+    "KAFKA_TOPIC_NOT_ANTISEMITIC", "enriched_preprocessed_tweets_not_antisemitic"
+)
 
 # Kafka Consumer
 KAFKA_GROUP_ID = os.getenv("KAFKA_GROUP_ID", "persister_service")

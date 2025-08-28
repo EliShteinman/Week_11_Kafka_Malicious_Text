@@ -1,7 +1,8 @@
+import logging
+from typing import Any, Dict
+
 from pymongo.collection import Collection
 from pymongo.errors import PyMongoError
-import logging
-from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 

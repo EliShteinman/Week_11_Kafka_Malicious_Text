@@ -1,9 +1,11 @@
 import asyncio
-import time
-from shared.kafka_utils import AsyncKafkaProducer, AsyncKafkaConsumer
-import config
 import logging
+import time
+
+import config
 from preprocessor_service import PreprocessorService
+
+from shared.kafka_utils import AsyncKafkaConsumer, AsyncKafkaProducer
 
 logging.basicConfig(level=config.LOG_LEVEL)
 logging.getLogger("kafka").setLevel(level=config.LOG_KAFKA)
@@ -19,12 +21,16 @@ async def main():
     logger.info("RetrieverData service initialized")
 
     # Initialize Kafka connections
-    logger.info(f"Initializing Kafka producer - Server: {config.KAFKA_URL}:{config.KAFKA_PORT}")
-    producer = AsyncKafkaProducer(bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}")
+    logger.info(
+        f"Initializing Kafka producer - Server: {config.KAFKA_URL}:{config.KAFKA_PORT}"
+    )
+    producer = AsyncKafkaProducer(
+        bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}"
+    )
     consumer = AsyncKafkaConsumer(
         [config.KAFKA_TOPIC_IN_ANTISEMITIC, config.KAFKA_TOPIC_IN_NOT_ANTISEMITIC],
         bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}",
-        group_id=config.KAFKA_GROUP_ID
+        group_id=config.KAFKA_GROUP_ID,
     )
     preprocessor = PreprocessorService(producer)
 
@@ -36,7 +42,9 @@ async def main():
         logger.error(f"Failed to start Kafka: {e}")
         return
 
-    logger.info(f"Starting to consume from topics: {config.KAFKA_TOPIC_IN_ANTISEMITIC}, {config.KAFKA_TOPIC_IN_NOT_ANTISEMITIC}")
+    logger.info(
+        f"Starting to consume from topics: {config.KAFKA_TOPIC_IN_ANTISEMITIC}, {config.KAFKA_TOPIC_IN_NOT_ANTISEMITIC}"
+    )
     logger.info("Starting main processing loop...")
 
     # Performance tracking variables
@@ -50,9 +58,11 @@ async def main():
             async for topic, tweet in consumer.consume():
                 message_count += 1
                 processed_in_batch += 1
-                tweet_id = tweet.get('_id', 'unknown_id')
+                tweet_id = tweet.get("_id", "unknown_id")
 
-                logger.debug(f"Processing message #{message_count} from topic '{topic}' - Tweet ID: {tweet_id}")
+                logger.debug(
+                    f"Processing message #{message_count} from topic '{topic}' - Tweet ID: {tweet_id}"
+                )
 
                 # Track processing time for each message
                 process_start_time = time.time()
@@ -65,7 +75,9 @@ async def main():
                 current_time = time.time()
                 if current_time - last_stats_time > 60:
                     rate = processed_in_batch / 60
-                    logger.info(f"Processing rate: {rate:.2f} messages/second | Total processed: {message_count}")
+                    logger.info(
+                        f"Processing rate: {rate:.2f} messages/second | Total processed: {message_count}"
+                    )
                     last_stats_time = current_time
                     processed_in_batch = 0
 

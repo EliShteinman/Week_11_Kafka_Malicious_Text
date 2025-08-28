@@ -2,7 +2,7 @@ import asyncio
 import datetime
 import json
 import logging
-from typing import Any, Awaitable, Callable, Optional, Sequence, AsyncIterator, Tuple
+from typing import Any, AsyncIterator, Awaitable, Callable, Optional, Sequence, Tuple
 
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
@@ -48,7 +48,9 @@ class AsyncKafkaProducer:
             acks=acks,
         )
         self._started = False
-        logger.info(f"Kafka producer initialized - Bootstrap servers: {bootstrap_servers}, ACKs: {acks}")
+        logger.info(
+            f"Kafka producer initialized - Bootstrap servers: {bootstrap_servers}, ACKs: {acks}"
+        )
 
     async def start(self) -> None:
         if not self._started:
@@ -84,12 +86,16 @@ class AsyncKafkaProducer:
 
         try:
             value = self._value_serializer(obj)
-            logger.debug(f"Sending message to topic '{topic}' - Size: {len(value)} bytes")
+            logger.debug(
+                f"Sending message to topic '{topic}' - Size: {len(value)} bytes"
+            )
 
             result = await self._producer.send_and_wait(topic, value=value)
 
-            logger.debug(f"Message sent successfully - Topic: {result.topic}, "
-                         f"Partition: {result.partition}, Offset: {result.offset}")
+            logger.debug(
+                f"Message sent successfully - Topic: {result.topic}, "
+                f"Partition: {result.partition}, Offset: {result.offset}"
+            )
             return result
 
         except Exception as e:
@@ -108,13 +114,13 @@ class AsyncKafkaConsumer:
     """
 
     def __init__(
-            self,
-            topics: Sequence[str],
-            bootstrap_servers: str,
-            *,
-            group_id: str,
-            auto_offset_reset: str = "earliest",
-            enable_auto_commit: bool = True,
+        self,
+        topics: Sequence[str],
+        bootstrap_servers: str,
+        *,
+        group_id: str,
+        auto_offset_reset: str = "earliest",
+        enable_auto_commit: bool = True,
     ):
         """
         Args:
@@ -133,8 +139,10 @@ class AsyncKafkaConsumer:
             value_deserializer=_kafka_json_deserializer,
         )
         self._started = False
-        logger.info(f"Kafka consumer initialized - Topics: {list(topics)}, "
-                    f"Bootstrap servers: {bootstrap_servers}, Group ID: {group_id}")
+        logger.info(
+            f"Kafka consumer initialized - Topics: {list(topics)}, "
+            f"Bootstrap servers: {bootstrap_servers}, Group ID: {group_id}"
+        )
 
     async def start(self) -> None:
         if not self._started:
@@ -159,9 +167,9 @@ class AsyncKafkaConsumer:
                 raise
 
     async def consume_forever(
-            self,
-            handler: Callable[[str, Any], Awaitable[None]],
-            cancel_event: Optional[asyncio.Event] = None,
+        self,
+        handler: Callable[[str, Any], Awaitable[None]],
+        cancel_event: Optional[asyncio.Event] = None,
     ) -> None:
         """
         Consume messages one by one. Calls handler(topic, msg_value) for each message,
@@ -185,23 +193,31 @@ class AsyncKafkaConsumer:
                     break
 
                 message_count += 1
-                logger.debug(f"Received message #{message_count} from topic '{msg.topic}' "
-                             f"(Partition: {msg.partition}, Offset: {msg.offset})")
+                logger.debug(
+                    f"Received message #{message_count} from topic '{msg.topic}' "
+                    f"(Partition: {msg.partition}, Offset: {msg.offset})"
+                )
 
                 try:
                     await handler(msg.topic, msg.value)
                     logger.debug(f"Message #{message_count} processed successfully")
                 except Exception as e:
-                    logger.exception(f"Error processing message #{message_count} from topic {msg.topic}: {e}")
+                    logger.exception(
+                        f"Error processing message #{message_count} from topic {msg.topic}: {e}"
+                    )
                     logger.debug(f"Message value: {msg.value}")
 
         except Exception as e:
             logger.error(f"Error in consumption loop: {e}")
             raise
         finally:
-            logger.info(f"Message consumption ended. Total messages processed: {message_count}")
+            logger.info(
+                f"Message consumption ended. Total messages processed: {message_count}"
+            )
 
-    async def consume(self, cancel_event: Optional[asyncio.Event] = None) -> AsyncIterator[Tuple[str, Any]]:
+    async def consume(
+        self, cancel_event: Optional[asyncio.Event] = None
+    ) -> AsyncIterator[Tuple[str, Any]]:
         """
         Consume messages as an async iterator.
 
@@ -225,8 +241,10 @@ class AsyncKafkaConsumer:
                     break
 
                 message_count += 1
-                logger.debug(f"Received message #{message_count} from topic '{msg.topic}' "
-                             f"(Partition: {msg.partition}, Offset: {msg.offset})")
+                logger.debug(
+                    f"Received message #{message_count} from topic '{msg.topic}' "
+                    f"(Partition: {msg.partition}, Offset: {msg.offset})"
+                )
 
                 yield msg.topic, msg.value
                 logger.debug(f"Message #{message_count} yielded successfully")
@@ -235,4 +253,6 @@ class AsyncKafkaConsumer:
             logger.error(f"Error in consumption loop: {e}")
             raise
         finally:
-            logger.info(f"Message consumption ended. Total messages processed: {message_count}")
+            logger.info(
+                f"Message consumption ended. Total messages processed: {message_count}"
+            )
