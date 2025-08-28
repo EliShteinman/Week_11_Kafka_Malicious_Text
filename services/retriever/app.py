@@ -16,7 +16,7 @@ async def main():
 
     db_client = SingletonMongoClient(
         uri=config.MONGO_URI,
-        db_name=config.MONGO_COLLECTION_RAW_TWEETS,
+        db_name=config.MONGO_DB_NAME,
         collection_name=config.MONGO_COLLECTION_RAW_TWEETS,
     )
     try:
