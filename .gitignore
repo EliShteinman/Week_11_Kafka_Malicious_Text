@@ -162,5 +162,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 מבנה תיקיות.md
-shared/nltk_data
+*nltk_data
 test.ipynb
