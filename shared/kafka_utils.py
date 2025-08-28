@@ -2,7 +2,7 @@ import asyncio
 import datetime
 import json
 import logging
-from typing import Any, Awaitable, Callable, Optional, Sequence
+from typing import Any, Awaitable, Callable, Optional, Sequence, AsyncIterator, Tuple
 
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
@@ -194,6 +194,42 @@ class AsyncKafkaConsumer:
                 except Exception as e:
                     logger.exception(f"Error processing message #{message_count} from topic {msg.topic}: {e}")
                     logger.debug(f"Message value: {msg.value}")
+
+        except Exception as e:
+            logger.error(f"Error in consumption loop: {e}")
+            raise
+        finally:
+            logger.info(f"Message consumption ended. Total messages processed: {message_count}")
+
+    async def consume(self, cancel_event: Optional[asyncio.Event] = None) -> AsyncIterator[Tuple[str, Any]]:
+        """
+        Consume messages as an async iterator.
+
+        Args:
+            cancel_event: Optional asyncio.Event. If set, the consumption will stop gracefully.
+
+        Yields:
+            Tuple[str, Any]: (topic_name, message_value) for each received message
+        """
+        if not self._started:
+            logger.error("Kafka consumer is not started")
+            raise RuntimeError("Kafka consumer is not started")
+
+        logger.info("Starting message consumption loop...")
+        message_count = 0
+
+        try:
+            async for msg in self._consumer:
+                if cancel_event is not None and cancel_event.is_set():
+                    logger.info("Cancel event received, stopping consumption")
+                    break
+
+                message_count += 1
+                logger.debug(f"Received message #{message_count} from topic '{msg.topic}' "
+                             f"(Partition: {msg.partition}, Offset: {msg.offset})")
+
+                yield msg.topic, msg.value
+                logger.debug(f"Message #{message_count} yielded successfully")
 
         except Exception as e:
             logger.error(f"Error in consumption loop: {e}")
