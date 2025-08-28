@@ -16,7 +16,7 @@ async def main():
     logger.info(f"Initializing Kafka producer - Server: {config.KAFKA_URL}:{config.KAFKA_PORT}")
     producer = AsyncKafkaProducer(bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}")
     consumer = AsyncKafkaConsumer(
-        config.KAFKA_TOPIC_IN_1, config.KAFKA_TOPIC_IN_2,
+        [config.KAFKA_TOPIC_IN_1, config.KAFKA_TOPIC_IN_2],
         bootstrap_servers=f"{config.KAFKA_URL}:{config.KAFKA_PORT}",
         group_id=config.KAFKA_GROUP_ID
     )
@@ -33,14 +33,14 @@ async def main():
 
     while True:
         try:
-
-            tweets = await consumer.consume_forever()
-            for tweet in tweets:
+            async for topic, tweet in consumer.consume():
                 logger.debug(f"Consumed tweet from Kafka: {tweet.get('_id', 'unknown_id')}")
-                await preprocessor.process_text(tweet.topic, tweet.value)
+                await preprocessor.process_and_send_tweet(topic, tweet)
         except Exception as e:
             logger.error(f"Error consuming messages from Kafka: {e}")
         await asyncio.sleep(5)
+
+
 
 if __name__ == "__main__":
     try:
