@@ -112,7 +112,7 @@ async def get_antisemitic_tweets():
             config.MONGO_COLLECTION_ANTISEMITIC
         )
 
-        tweet_models = [TweetModel.parse_obj(tweet_dict) for tweet_dict in tweet_dicts]
+        tweet_models = [TweetModel.model_validate(tweet_dict) for tweet_dict in tweet_dicts]
         return TweetResponse(count=len(tweet_models), data=tweet_models)
 
     except HTTPException:
@@ -136,7 +136,7 @@ async def get_normal_tweets():
             config.MONGO_COLLECTION_NOT_ANTISEMITIC
         )
 
-        tweet_models = [TweetModel.parse_obj(tweet_dict) for tweet_dict in tweet_dicts]
+        tweet_models = [TweetModel.model_validate(tweet_dict) for tweet_dict in tweet_dicts]
         return TweetResponse(count=len(tweet_models), data=tweet_models)
 
     except HTTPException:

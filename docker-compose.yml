@@ -75,8 +75,9 @@ services:
       dockerfile: services/data_retrieval/Dockerfile
     restart: unless-stopped
     environment:
-      MONGODB_URI: mongodb://mongodb:27017/
-      MONGO_DB_NAME: processed_tweets
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_DB_NAME: IranMalDB
       MONGO_COLLECTION_ANTISEMITIC: tweets_antisemitic
       MONGO_COLLECTION_NOT_ANTISEMITIC: tweets_not_antisemitic
       LOG_LEVEL: INFO
@@ -150,7 +151,7 @@ services:
       TARGET_ORIGINAL: "text"
       TARGET_PROCESSED: "clean_text"
       KAFKA_GROUP_ID: "enricher-group"
-      WEAPONS_FILE_PATH: "data/weapons.txt"
+      WEAPONS_FILE_PATH: "data/weapon_list.txt"
       SENTIMENT_THRESHOLD_NEGATIVE: "-0.5"
       SENTIMENT_THRESHOLD_POSITIVE: "0.5"
       LOG_LEVEL: "INFO"

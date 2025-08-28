@@ -50,12 +50,12 @@ class SingletonMongoClient(AsyncMongoClient):
             return True
         except PyMongoError as e:
             logger.error(f"MongoDB connection verification failed: {e}")
-            return False
+            raise
         except Exception as e:
             logger.error(
                 f"Unexpected error during MongoDB connection verification: {e}"
             )
-            return False
+            raise
 
     def is_connected(self) -> bool:
         connected = hasattr(self, "_initialized") and self._initialized

@@ -55,12 +55,25 @@ class EnricherService:
         self.sentiment_analyzer = SentimentAnalyzer()
 
         weapons_file_path = config.WEAPONS_FILE_PATH
-        self.weapons_list = LoadFile.load_file(weapons_file_path)
-        if not self.weapons_list:
+        raw_weapons = LoadFile.load_file(weapons_file_path)
+        if not raw_weapons:
             logger.warning(
                 f"No weapons loaded from {weapons_file_path}. Weapon detection will not function."
             )
-        self.weapon_detector = WeaponDetector(self.weapons_list)
+            cleaned_weapons = []
+        else:
+            cleaned_weapons = []
+            for weapon in raw_weapons:
+                if ': ' in weapon:
+                    weapon_text = weapon.split(': ', 1)[1]
+                else:
+                    weapon_text = weapon
+
+                cleaned_weapon = self.text_cleaner.clean_central(weapon_text)
+                if cleaned_weapon:
+                    cleaned_weapons.append(cleaned_weapon)
+
+        self.weapon_detector = WeaponDetector(cleaned_weapons)
 
         self.time_extractor = Time_extractor()
 
@@ -112,7 +125,7 @@ class EnricherService:
                 )
                 processed_message["sentiment"] = "neutral"
                 processed_message["weapons_detected"] = []
-                processed_message["relevant_timestamp"] = None
+                processed_message["relevant_timestamp"] = ""
             else:
                 # 1. Sentiment Analysis
                 sentiment_score = self.sentiment_analyzer.get_sentiment_score(
@@ -143,8 +156,8 @@ class EnricherService:
                 # We need to pick the latest one if multiple are found.
                 extracted_timestamps = self.time_extractor.DateTimeExtractor(
                     original_text
-                )
-                relevant_timestamp = None
+                ) or []
+                relevant_timestamp = ""
                 if extracted_timestamps:
                     try:
                         # Try to parse and find the latest date
@@ -158,7 +171,7 @@ class EnricherService:
                             f"Tweet {tweet_id} - Could not parse all extracted timestamps: {extracted_timestamps}"
                         )
                         # Fallback to just taking the first one if parsing fails, or keep None
-                        relevant_timestamp = extracted_timestamps[0]
+                        relevant_timestamp = extracted_timestamps[0] or ""
 
                 processed_message["relevant_timestamp"] = relevant_timestamp
                 logger.debug(

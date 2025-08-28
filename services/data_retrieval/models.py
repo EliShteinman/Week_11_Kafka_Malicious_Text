@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class TweetModel(BaseModel):
@@ -13,20 +13,18 @@ class TweetModel(BaseModel):
     createdate: datetime = Field(
         ..., alias="CreateDate", description="Original creation date"
     )
-    antisemietic: int = Field(
+    antisemitic: int = Field(
         ..., alias="Antisemitic", description="0 or 1 - antisemitic classification"
     )
     original_text: str = Field(..., alias="text", description="Original tweet text")
     clean_text: str = Field(..., description="Processed/cleaned text")
     sentiment: str = Field(..., description="positive/negative/neutral")
     weapons_detected: List[str] = Field(
-        default=[], description="List of detected weapons"
+        default_factory=list, description="List of detected weapons"
     )
     relevant_timestamp: str = Field(default="", description="Extracted date from text")
 
-    class Config:
-        allow_population_by_field_name = True
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class TweetResponse(BaseModel):
