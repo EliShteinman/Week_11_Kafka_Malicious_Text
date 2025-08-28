@@ -7,7 +7,6 @@ from preprocessor_service import PreprocessorService
 
 from shared.kafka_utils import AsyncKafkaConsumer, AsyncKafkaProducer
 
-
 logging.basicConfig(level=config.LOG_LEVEL)
 logging.getLogger("kafka").setLevel(level=config.LOG_KAFKA)
 logger = logging.getLogger(__name__)

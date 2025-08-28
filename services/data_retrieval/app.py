@@ -9,7 +9,6 @@ from . import config
 from .data_repository import TweetRepository
 from .models import TweetModel, TweetResponse
 
-
 # Setup logging
 logging.basicConfig(level=config.LOG_LEVEL)
 logger = logging.getLogger(__name__)
@@ -24,7 +23,6 @@ async def lifespan(app: FastAPI):
     try:
         mongo_client = SingletonMongoClient(
             uri=config.MONGO_URI, db_name=config.MONGO_DB_NAME
-
         )
         await mongo_client.connect_and_verify()
         logger.info("Database connection established successfully")
@@ -74,7 +72,6 @@ def health_check():
     return {"status": "ok", "service": "tweet-retrieval-api"}
 
 
-
 @app.get("/health")
 def detailed_health_check():
     """
@@ -115,7 +112,7 @@ async def get_antisemitic_tweets():
             config.MONGO_COLLECTION_ANTISEMITIC
         )
 
-        tweet_models = [TweetModel.parse_obj(tweet_dict) for tweet_dict in tweet_dicts]
+        tweet_models = [TweetModel.model_validate(tweet_dict) for tweet_dict in tweet_dicts]
         return TweetResponse(count=len(tweet_models), data=tweet_models)
 
     except HTTPException:
@@ -139,7 +136,7 @@ async def get_normal_tweets():
             config.MONGO_COLLECTION_NOT_ANTISEMITIC
         )
 
-        tweet_models = [TweetModel.parse_obj(tweet_dict) for tweet_dict in tweet_dicts]
+        tweet_models = [TweetModel.model_validate(tweet_dict) for tweet_dict in tweet_dicts]
         return TweetResponse(count=len(tweet_models), data=tweet_models)
 
     except HTTPException:
@@ -161,4 +158,3 @@ if __name__ == "__main__":
         port=config.API_PORT,
         log_level=config.LOG_LEVEL.lower(),
     )
-

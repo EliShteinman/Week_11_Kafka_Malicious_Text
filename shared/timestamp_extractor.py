@@ -4,11 +4,16 @@ import re
 class Time_extractor:
     def __init__(self):
         # Different types of date regexes to extract below types of formats
-        self.DateTimeRegex = {"day-month-year": r"\b\d{4}-\d{2}-\d{2}\b"}
+        self.DateTimeRegex = {
+            "year-month-day-dash": r"\b\d{4}-\d{2}-\d{2}\b",
+            "day-month-year-dash": r"\b\d{2}-\d{2}-\d{4}\b",
+            "year-month-day-slash": r"\b\d{4}/\d{2}/\d{2}\b",
+            "day-month-year-slash": r"\b\d{2}/\d{2}/\d{4}\b"
+        }
         # Consolidated regex with many possible timestamps
         self.reg = "|".join(self.DateTimeRegex.values())
 
-    ## Function to remove some special characters
+    # Function to remove some special characters
     def preprocess(self, x):
         x = x.replace("\t", " ")
         x = x.replace("\n", " ")
@@ -23,7 +28,7 @@ class Time_extractor:
         x = x.replace("'", "")
         return x
 
-    ## Function to extract date and time
+    # Function to extract date and time
     def DateTimeExtractor(self, x):
         x = self.preprocess(x)
         DT = re.findall(self.reg, x)

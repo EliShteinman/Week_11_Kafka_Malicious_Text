@@ -1,4 +1,4 @@
-name: myproject
+name: Kafka-Malicious-Text
 services:
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -75,8 +75,9 @@ services:
       dockerfile: services/data_retrieval/Dockerfile
     restart: unless-stopped
     environment:
-      MONGODB_URI: mongodb://mongodb:27017/
-      MONGO_DB_NAME: processed_tweets
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_DB_NAME: IranMalDB
       MONGO_COLLECTION_ANTISEMITIC: tweets_antisemitic
       MONGO_COLLECTION_NOT_ANTISEMITIC: tweets_not_antisemitic
       LOG_LEVEL: INFO
@@ -147,10 +148,10 @@ services:
       KAFKA_TOPIC_IN_NOT_ANTISEMITIC: "preprocessed_tweets_not_antisemitic"
       KAFKA_TOPIC_OUT_ANTISEMITIC: "enriched_preprocessed_tweets_antisemitic"
       KAFKA_TOPIC_OUT_NOT_ANTISEMITIC: "enriched_preprocessed_tweets_not_antisemitic"
-      TARGET_ORIGINAL: "text"
+      ORIGINAL_TEXT_FIELD: "text"
       TARGET_PROCESSED: "clean_text"
       KAFKA_GROUP_ID: "enricher-group"
-      WEAPONS_FILE_PATH: "data/weapons.txt"
+      WEAPONS_FILE_PATH: "data/weapon_list.txt"
       SENTIMENT_THRESHOLD_NEGATIVE: "-0.5"
       SENTIMENT_THRESHOLD_POSITIVE: "0.5"
       LOG_LEVEL: "INFO"
@@ -175,7 +176,7 @@ services:
       MONGO_COLLECTION_ANTISEMITIC: "tweets_antisemitic"
       MONGO_COLLECTION_NOT_ANTISEMITIC: "tweets_not_antisemitic"
       KAFKA_TOPIC_IN_ANTISEMITIC: "enriched_preprocessed_tweets_antisemitic"
-      KAFKA_TOPIC_IN_NOT_ANTISEMITIC: "enriched_preprocessed_tweets_not_antisemitic"  # שם עקבי
+      KAFKA_TOPIC_IN_NOT_ANTISEMITIC: "enriched_preprocessed_tweets_not_antisemitic"
       KAFKA_GROUP_ID: "persister-group"
       LOG_LEVEL: "INFO"
       LOG_KAFKA: "ERROR"
