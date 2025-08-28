@@ -48,16 +48,29 @@ class AsyncKafkaProducer:
             acks=acks,
         )
         self._started = False
+        logger.info(f"Kafka producer initialized - Bootstrap servers: {bootstrap_servers}, ACKs: {acks}")
 
     async def start(self) -> None:
         if not self._started:
-            await self._producer.start()
-            self._started = True
+            try:
+                logger.info("Starting Kafka producer...")
+                await self._producer.start()
+                self._started = True
+                logger.info("Kafka producer started successfully")
+            except Exception as e:
+                logger.error(f"Failed to start Kafka producer: {e}")
+                raise
 
     async def stop(self) -> None:
         if self._started:
-            await self._producer.stop()
-            self._started = False
+            try:
+                logger.info("Stopping Kafka producer...")
+                await self._producer.stop()
+                self._started = False
+                logger.info("Kafka producer stopped successfully")
+            except Exception as e:
+                logger.error(f"Error stopping Kafka producer: {e}")
+                raise
 
     async def send_json(self, topic: str, obj: Any):
         """
@@ -65,8 +78,24 @@ class AsyncKafkaProducer:
         Returns:
             RecordMetadata: Metadata about the sent record (topic, partition, offset, etc.).
         """
-        value = self._value_serializer(obj)
-        return await self._producer.send_and_wait(topic, value=value)
+        if not self._started:
+            logger.error("Kafka producer is not started")
+            raise RuntimeError("Kafka producer is not started")
+
+        try:
+            value = self._value_serializer(obj)
+            logger.debug(f"Sending message to topic '{topic}' - Size: {len(value)} bytes")
+
+            result = await self._producer.send_and_wait(topic, value=value)
+
+            logger.debug(f"Message sent successfully - Topic: {result.topic}, "
+                         f"Partition: {result.partition}, Offset: {result.offset}")
+            return result
+
+        except Exception as e:
+            logger.error(f"Failed to send message to topic '{topic}': {e}")
+            logger.debug(f"Message object type: {type(obj)}")
+            raise
 
 
 class AsyncKafkaConsumer:
@@ -79,13 +108,13 @@ class AsyncKafkaConsumer:
     """
 
     def __init__(
-        self,
-        topics: Sequence[str],
-        bootstrap_servers: str,
-        *,
-        group_id: str,
-        auto_offset_reset: str = "earliest",
-        enable_auto_commit: bool = True,
+            self,
+            topics: Sequence[str],
+            bootstrap_servers: str,
+            *,
+            group_id: str,
+            auto_offset_reset: str = "earliest",
+            enable_auto_commit: bool = True,
     ):
         """
         Args:
@@ -104,21 +133,35 @@ class AsyncKafkaConsumer:
             value_deserializer=_kafka_json_deserializer,
         )
         self._started = False
+        logger.info(f"Kafka consumer initialized - Topics: {list(topics)}, "
+                    f"Bootstrap servers: {bootstrap_servers}, Group ID: {group_id}")
 
     async def start(self) -> None:
         if not self._started:
-            await self._consumer.start()
-            self._started = True
+            try:
+                logger.info("Starting Kafka consumer...")
+                await self._consumer.start()
+                self._started = True
+                logger.info("Kafka consumer started successfully")
+            except Exception as e:
+                logger.error(f"Failed to start Kafka consumer: {e}")
+                raise
 
     async def stop(self) -> None:
         if self._started:
-            await self._consumer.stop()
-            self._started = False
+            try:
+                logger.info("Stopping Kafka consumer...")
+                await self._consumer.stop()
+                self._started = False
+                logger.info("Kafka consumer stopped successfully")
+            except Exception as e:
+                logger.error(f"Error stopping Kafka consumer: {e}")
+                raise
 
     async def consume_forever(
-        self,
-        handler: Callable[[str, Any], Awaitable[None]],
-        cancel_event: Optional[asyncio.Event] = None,
+            self,
+            handler: Callable[[str, Any], Awaitable[None]],
+            cancel_event: Optional[asyncio.Event] = None,
     ) -> None:
         """
         Consume messages one by one. Calls handler(topic, msg_value) for each message,
@@ -128,12 +171,32 @@ class AsyncKafkaConsumer:
             handler: Callable to process each message.
             cancel_event: Optional asyncio.Event. If set, the consumption loop will exit gracefully.
         """
-        async for msg in self._consumer:
-            if cancel_event is not None and cancel_event.is_set():
-                break
-            try:
-                await handler(msg.topic, msg.value)
-            except Exception as e:
-                logger.exception(
-                    f"Error processing message from topic {msg.topic}: {e}"
-                )
+        if not self._started:
+            logger.error("Kafka consumer is not started")
+            raise RuntimeError("Kafka consumer is not started")
+
+        logger.info("Starting message consumption loop...")
+        message_count = 0
+
+        try:
+            async for msg in self._consumer:
+                if cancel_event is not None and cancel_event.is_set():
+                    logger.info("Cancel event received, stopping consumption")
+                    break
+
+                message_count += 1
+                logger.debug(f"Received message #{message_count} from topic '{msg.topic}' "
+                             f"(Partition: {msg.partition}, Offset: {msg.offset})")
+
+                try:
+                    await handler(msg.topic, msg.value)
+                    logger.debug(f"Message #{message_count} processed successfully")
+                except Exception as e:
+                    logger.exception(f"Error processing message #{message_count} from topic {msg.topic}: {e}")
+                    logger.debug(f"Message value: {msg.value}")
+
+        except Exception as e:
+            logger.error(f"Error in consumption loop: {e}")
+            raise
+        finally:
+            logger.info(f"Message consumption ended. Total messages processed: {message_count}")
