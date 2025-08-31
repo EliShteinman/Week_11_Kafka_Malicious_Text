@@ -1,7 +1,7 @@
 import re
 
 
-class Time_extractor:
+class TimeExtractor:
     def __init__(self):
         # Different types of date regexes to extract below types of formats
         self.DateTimeRegex = {
@@ -29,13 +29,13 @@ class Time_extractor:
         return x
 
     # Function to extract date and time
-    def DateTimeExtractor(self, x):
+    def date_time_extractor(self, x):
         x = self.preprocess(x)
-        DT = re.findall(self.reg, x)
-        return DT
+        dt = re.findall(self.reg, x)
+        return dt
 
 
 if __name__ == "__main__":
-    time_extractor = Time_extractor()
+    time_extractor = TimeExtractor()
     samplestring1 = 'scala> val xorder= new order(1,"kf hkdg hj h 2025-02-22 hug gf")'
-    print(time_extractor.DateTimeExtractor(samplestring1))
+    print(time_extractor.date_time_extractor(samplestring1))
