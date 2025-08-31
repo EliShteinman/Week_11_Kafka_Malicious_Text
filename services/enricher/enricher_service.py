@@ -173,6 +173,7 @@ class EnricherService:
         """Extract the most recent timestamp from text."""
         extracted_timestamps = self.time_extractor.date_time_extractor(original_text) or []
 
+
         if not extracted_timestamps:
             return ""
 

@@ -30,6 +30,7 @@ class TimeExtractor:
 
     # Function to extract date and time
     def date_time_extractor(self, x):
+
         x = self.preprocess(x)
         dt = re.findall(self.reg, x)
         return dt
