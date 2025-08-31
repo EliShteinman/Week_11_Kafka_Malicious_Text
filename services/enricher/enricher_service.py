@@ -7,7 +7,7 @@ import config
 from shared.kafka_utils import AsyncKafkaProducer
 from shared.sentiment_analyzer import SentimentAnalyzer
 from shared.text_processing import TextProcessing
-from shared.timestamp_extractor import Time_extractor
+from shared.timestamp_extractor import TimeExtractor
 from shared.weapon_detector import WeaponDetector
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class EnricherService:
         """Setup sentiment analyzer, weapon detector and time extractor."""
         self.sentiment_analyzer = SentimentAnalyzer()
         self._setup_weapon_detector()
-        self.time_extractor = Time_extractor()
+        self.time_extractor = TimeExtractor()
 
     def _setup_weapon_detector(self):
         """Load and process weapon list for detection."""
@@ -171,7 +171,8 @@ class EnricherService:
 
     def _extract_timestamp(self, original_text: str, tweet_id: str) -> str:
         """Extract the most recent timestamp from text."""
-        extracted_timestamps = self.time_extractor.DateTimeExtractor(original_text) or []
+        extracted_timestamps = self.time_extractor.date_time_extractor(original_text) or []
+
 
         if not extracted_timestamps:
             return ""
