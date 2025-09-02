@@ -7,7 +7,6 @@ import config
 from shared.kafka_utils import AsyncKafkaProducer
 from shared.text_processing import TextProcessing
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -107,7 +106,6 @@ class PreprocessorService:
             processed_message["processed_at"] = datetime.now().isoformat()
             processed_message["original_topic"] = input_topic
 
-
             # Determine output topic
             output_topic = self._get_output_topic(input_topic, tweet_id)
             if not output_topic:
@@ -131,7 +129,6 @@ class PreprocessorService:
             logger.info(
                 f"Successfully sent processed message to topic '{output_topic}' for tweet ID: {tweet_id} (processing time: {processing_time:.3f}s)"
             )
-
 
             # Log statistics every 100 processed messages
             if self.processed_count % 100 == 0:
@@ -207,7 +204,6 @@ class PreprocessorService:
                 if self.processed_count > 0
                 else 0
             ),
-
         }
 
 
@@ -226,7 +222,6 @@ if __name__ == "__main__":
         "Running, runner, runs — all should be stemmed.",
         "",
         "   ",
-
     ]
 
     text_processor_standalone = TextProcessing()
@@ -244,4 +239,3 @@ if __name__ == "__main__":
         print("-" * 50)
 
     logger.info("Standalone test completed")
-

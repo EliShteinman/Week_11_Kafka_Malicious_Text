@@ -1,6 +1,5 @@
 import os
 
-
 # Collections created by Persister service
 MONGO_COLLECTION_ANTISEMITIC = os.getenv(
     "MONGO_COLLECTION_ANTISEMITIC", "tweets_antisemitic"
@@ -8,7 +7,13 @@ MONGO_COLLECTION_ANTISEMITIC = os.getenv(
 MONGO_COLLECTION_NOT_ANTISEMITIC = os.getenv(
     "MONGO_COLLECTION_NOT_ANTISEMITIC", "tweets_not_antisemitic"
 )
-
+# Build MongoDB URI
+if MONGO_ATLAS_URI:
+    MONGO_URI = MONGO_ATLAS_URI
+elif MONGO_USER and MONGO_PASSWORD:
+    MONGO_URI = f"mongodb://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/"
+else:
+    MONGO_URI = f"mongodb://{MONGO_HOST}:{MONGO_PORT}/"
 # API Configuration
 API_HOST = os.getenv("API_HOST", "0.0.0.0")
 API_PORT = int(os.getenv("API_PORT", 8082))

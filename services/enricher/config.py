@@ -2,6 +2,7 @@
 Configuration module for the tweet preprocessing service.
 Contains all environment variable definitions and default values.
 """
+
 import os
 
 # Kafka connection settings
@@ -29,7 +30,7 @@ KAFKA_TOPIC_OUT_NOT_ANTISEMITIC = os.getenv(
 )
 
 # Processing configuration
-TARGET_ORIGINAL = os.getenv(
+ORIGINAL_TEXT_FIELD = os.getenv(
     "TARGET_KEY", "text"
 )  # Key name for text content in tweet messages
 TARGET_PROCESSED = os.getenv(
@@ -39,7 +40,7 @@ TARGET_PROCESSED = os.getenv(
 # Kafka consumer group settings
 KAFKA_GROUP_ID = os.environ.get("KAFKA_GROUP_ID", "enricher-group")
 
-WEAPONS_FILE_PATH = os.getenv("WEAPONS_FILE_PATH", "data/weapons.txt")
+WEAPONS_FILE_PATH = os.getenv("WEAPONS_FILE_PATH", "data/weapon_list.txt")
 
 SENTIMENT_THRESHOLD_NEGATIVE = float(os.getenv("SENTIMENT_THRESHOLD_NEGATIVE", -0.5))
 SENTIMENT_THRESHOLD_POSITIVE = float(os.getenv("SENTIMENT_THRESHOLD_POSITIVE", 0.5))

@@ -7,7 +7,6 @@ from retriever_service import RetrieverData
 from shared.kafka_utils import AsyncKafkaProducer
 from shared.mongo_utils import SingletonMongoClient
 
-
 logging.basicConfig(level=config.LOG_LEVEL)
 logging.getLogger("pymongo").setLevel(level=config.LOG_MONGO)
 logging.getLogger("kafka").setLevel(level=config.LOG_KAFKA)
@@ -31,7 +30,7 @@ async def main():
 
     collection = db_client.get_collection()
     retriever = RetrieverData(collection)
-    logger.info(f"RetrieverData service initialized")
+    logger.info("RetrieverData service initialized")
 
     logger.info(
         f"Initializing Kafka producer - Server: {config.KAFKA_URL}:{config.KAFKA_PORT}"
@@ -109,4 +108,3 @@ if __name__ == "__main__":
     except Exception as e:
         logger.critical(f"Critical error in main: {e}")
         raise
-

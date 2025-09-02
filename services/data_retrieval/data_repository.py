@@ -6,7 +6,6 @@ from bson import ObjectId
 
 from shared.mongo_utils import SingletonMongoClient
 
-
 logger = logging.getLogger(__name__)
 
 

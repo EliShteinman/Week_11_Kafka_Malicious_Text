@@ -4,7 +4,6 @@ import json
 import logging
 from typing import Any, AsyncIterator, Awaitable, Callable, Optional, Sequence, Tuple
 
-
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
 logger = logging.getLogger(__name__)
@@ -52,7 +51,6 @@ class AsyncKafkaProducer:
         logger.info(
             f"Kafka producer initialized - Bootstrap servers: {bootstrap_servers}, ACKs: {acks}"
         )
-
 
     async def start(self) -> None:
         if not self._started:
@@ -116,13 +114,13 @@ class AsyncKafkaConsumer:
     """
 
     def __init__(
-            self,
-            topics: Sequence[str],
-            bootstrap_servers: str,
-            *,
-            group_id: str,
-            auto_offset_reset: str = "earliest",
-            enable_auto_commit: bool = True,
+        self,
+        topics: Sequence[str],
+        bootstrap_servers: str,
+        *,
+        group_id: str,
+        auto_offset_reset: str = "earliest",
+        enable_auto_commit: bool = True,
     ):
         """
         Args:
@@ -169,9 +167,9 @@ class AsyncKafkaConsumer:
                 raise
 
     async def consume_forever(
-            self,
-            handler: Callable[[str, Any], Awaitable[None]],
-            cancel_event: Optional[asyncio.Event] = None,
+        self,
+        handler: Callable[[str, Any], Awaitable[None]],
+        cancel_event: Optional[asyncio.Event] = None,
     ) -> None:
         """
         Consume messages one by one. Calls handler(topic, msg_value) for each message,
