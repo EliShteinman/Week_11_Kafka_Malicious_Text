@@ -1,0 +1,29 @@
+# Network Policies for security (optional but recommended)
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: microservices-netpol
+  namespace: kafka-malicious-text
+spec:
+  podSelector: {}  # Apply to all pods in namespace
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: kafka-malicious-text
+    - podSelector: {}  # Allow from same namespace
+  egress:
+  - to:
+    - podSelector: {}  # Allow to same namespace
+  - to: []  # Allow egress to external services (MongoDB Atlas, DNS)
+    ports:
+    - protocol: TCP
+      port: 443  # HTTPS
+    - protocol: TCP
+      port: 53   # DNS
+    - protocol: UDP
+      port: 53   # DNS

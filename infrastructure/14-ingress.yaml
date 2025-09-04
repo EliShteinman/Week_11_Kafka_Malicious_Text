@@ -1,0 +1,42 @@
+# Ingress for UI access (requires ingress controller)
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ui-ingress
+  namespace: kafka-malicious-text
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    # For other ingress controllers, adjust annotations accordingly
+spec:
+  rules:
+  - host: kafka-ui.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: kafka-ui
+            port:
+              number: 8080
+  - host: mongo-express.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mongo-express
+            port:
+              number: 8081
+  - host: data-retrieval.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: data-retrieval
+            port:
+              number: 8082

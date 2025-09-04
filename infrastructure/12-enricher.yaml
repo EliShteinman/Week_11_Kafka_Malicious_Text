@@ -1,0 +1,70 @@
+# Enricher Service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enricher
+  namespace: kafka-malicious-text
+  labels:
+    app: enricher
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: enricher
+  template:
+    metadata:
+      labels:
+        app: enricher
+    spec:
+      containers:
+      - name: enricher
+        image: your-registry/enricher:latest  # Replace with your image
+        env:
+        - name: KAFKA_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: kafka-url
+        - name: KAFKA_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: kafka-port
+        - name: KAFKA_TOPIC_IN_ANTISEMITIC
+          value: "preprocessed_tweets_antisemitic"
+        - name: KAFKA_TOPIC_IN_NOT_ANTISEMITIC
+          value: "preprocessed_tweets_not_antisemitic"
+        - name: KAFKA_TOPIC_OUT_ANTISEMITIC
+          value: "enriched_preprocessed_tweets_antisemitic"
+        - name: KAFKA_TOPIC_OUT_NOT_ANTISEMITIC
+          value: "enriched_preprocessed_tweets_not_antisemitic"
+        - name: ORIGINAL_TEXT_FIELD
+          value: "text"
+        - name: TARGET_PROCESSED
+          value: "clean_text"
+        - name: KAFKA_GROUP_ID
+          value: "enricher-group"
+        - name: WEAPONS_FILE_PATH
+          value: "data/weapon_list.txt"
+        - name: SENTIMENT_THRESHOLD_NEGATIVE
+          value: "-0.5"
+        - name: SENTIMENT_THRESHOLD_POSITIVE
+          value: "0.5"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: log-level
+        - name: LOG_KAFKA
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: log-kafka
+        resources:
+          requests:
+            cpu: 300m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi

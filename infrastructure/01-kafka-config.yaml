@@ -1,0 +1,9 @@
+# Kafka configuration and secrets
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-config
+  namespace: kafka-malicious-text
+data:
+  cluster-id: "GN6dEcxIR16qMCV7CauyTw"

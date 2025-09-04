@@ -1,0 +1,33 @@
+# Kafka Services
+---
+# Headless Service for StatefulSet
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-headless
+  namespace: kafka-malicious-text
+spec:
+  clusterIP: None
+  selector:
+    app: kafka
+  ports:
+  - name: client
+    port: 29092
+  - name: controller
+    port: 29093
+
+---
+# Regular Service for other services to connect
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: kafka-malicious-text
+spec:
+  selector:
+    app: kafka
+  ports:
+  - name: client
+    port: 29092
+    targetPort: 29092
+  type: ClusterIP

@@ -1,0 +1,28 @@
+# Application Configuration and Secrets
+---
+# ConfigMap for common environment variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: kafka-malicious-text
+data:
+  kafka-url: "kafka"
+  kafka-port: "29092"
+  mongo-host: "mongodb"
+  mongo-port: "27017"
+  mongo-db-name: "IranMalDB"
+  log-level: "INFO"
+  log-kafka: "ERROR"
+  log-mongo: "ERROR"
+
+---
+# Secret for MongoDB Atlas URI
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-atlas-secret
+  namespace: kafka-malicious-text
+type: Opaque
+stringData:
+  uri: "mongodb+srv://IRGC_NEW:iran135@cluster0.6ycjkak.mongodb.net/"

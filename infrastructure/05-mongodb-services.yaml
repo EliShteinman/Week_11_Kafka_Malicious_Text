@@ -1,0 +1,29 @@
+# MongoDB Services
+---
+# Regular Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: kafka-malicious-text
+spec:
+  selector:
+    app: mongodb
+  ports:
+  - port: 27017
+    targetPort: 27017
+  type: ClusterIP
+
+---
+# Headless Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-headless
+  namespace: kafka-malicious-text
+spec:
+  clusterIP: None
+  selector:
+    app: mongodb
+  ports:
+  - port: 27017

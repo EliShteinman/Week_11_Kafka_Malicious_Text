@@ -1,0 +1,80 @@
+# Persister Service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: persister
+  namespace: kafka-malicious-text
+  labels:
+    app: persister
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: persister
+  template:
+    metadata:
+      labels:
+        app: persister
+    spec:
+      containers:
+      - name: persister
+        image: your-registry/persister:latest  # Replace with your image
+        env:
+        - name: KAFKA_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: kafka-url
+        - name: KAFKA_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: kafka-port
+        - name: MONGO_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: mongo-host
+        - name: MONGO_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: mongo-port
+        - name: MONGO_DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: mongo-db-name
+        - name: MONGO_COLLECTION_ANTISEMITIC
+          value: "tweets_antisemitic"
+        - name: MONGO_COLLECTION_NOT_ANTISEMITIC
+          value: "tweets_not_antisemitic"
+        - name: KAFKA_TOPIC_IN_ANTISEMITIC
+          value: "enriched_preprocessed_tweets_antisemitic"
+        - name: KAFKA_TOPIC_IN_NOT_ANTISEMITIC
+          value: "enriched_preprocessed_tweets_not_antisemitic"
+        - name: KAFKA_GROUP_ID
+          value: "persister-group"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: log-level
+        - name: LOG_KAFKA
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: log-kafka
+        - name: LOG_MONGO
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: log-mongo
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi

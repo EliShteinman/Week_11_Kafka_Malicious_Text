@@ -1,0 +1,75 @@
+# Retriever Service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retriever
+  namespace: kafka-malicious-text
+  labels:
+    app: retriever
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: retriever
+  template:
+    metadata:
+      labels:
+        app: retriever
+    spec:
+      containers:
+      - name: retriever
+        image: your-registry/retriever:latest  # Replace with your image
+        env:
+        - name: MONGO_ATLAS_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongo-atlas-secret
+              key: uri
+        - name: MONGO_DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: mongo-db-name
+        - name: MONGO_COLLECTION_RAW_TWEETS
+          value: "tweets"
+        - name: MONGO_CLASSIFICATION_FIELD
+          value: "Antisemitic"
+        - name: KAFKA_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: kafka-url
+        - name: KAFKA_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: kafka-port
+        - name: KAFKA_TOPIC_OUT_ANTISEMITIC
+          value: "raw_tweets_antisemitic"
+        - name: KAFKA_TOPIC_OUT_NOT_ANTISEMITIC
+          value: "raw_tweets_not_antisemitic"
+        - name: KAFKA_GROUP_ID
+          value: "retrieve-group"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: log-level
+        - name: LOG_KAFKA
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: log-kafka
+        - name: LOG_MONGO
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: log-mongo
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi

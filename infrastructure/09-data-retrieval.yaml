@@ -1,0 +1,87 @@
+# Data Retrieval Service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-retrieval
+  namespace: kafka-malicious-text
+  labels:
+    app: data-retrieval
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-retrieval
+  template:
+    metadata:
+      labels:
+        app: data-retrieval
+    spec:
+      containers:
+      - name: data-retrieval
+        image: your-registry/data-retrieval:latest  # Replace with your image
+        ports:
+        - containerPort: 8082
+        env:
+        - name: MONGO_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: mongo-host
+        - name: MONGO_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: mongo-port
+        - name: MONGO_DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: mongo-db-name
+        - name: MONGO_COLLECTION_ANTISEMITIC
+          value: "tweets_antisemitic"
+        - name: MONGO_COLLECTION_NOT_ANTISEMITIC
+          value: "tweets_not_antisemitic"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: log-level
+        - name: LOG_MONGO
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: log-mongo
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8082
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-retrieval
+  namespace: kafka-malicious-text
+spec:
+  selector:
+    app: data-retrieval
+  ports:
+  - port: 8082
+    targetPort: 8082
+  type: ClusterIP
